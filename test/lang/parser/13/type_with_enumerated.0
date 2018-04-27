@@ -1,0 +1,5 @@
+(** @see [3] 3.4.3 *)
+
+TYPE
+    SWITCH_MODE: (AUTO, MANUAL);
+END TYPE

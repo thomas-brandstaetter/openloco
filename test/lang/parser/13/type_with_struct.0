@@ -1,0 +1,16 @@
+(** @see [2] Example 3.7 *)
+
+TYPE
+    Colour :        (red, yellow, green);           (* enumeration *)
+    Sensor :        INT (-56..128);                 (* range *)
+    Measure :       ARRAY [1..45] OF Sensor;        (* array *)
+    TestBench :     UINT; Colour:= red;             (* structure *)
+    STRUCT
+        Place :     UINT;                           (* elementary data type *)
+        Light :     Colour := red;                  (* enumerated data type with initial value *)
+        Meas1 :     Measure;                        (* array type *)
+        Meas2 :     Measure;                        (* array type *)
+        Meas3 :     Measure;                        (* array type *)
+    END_STRUCT;
+END_TYPE
+

@@ -1,0 +1,5 @@
+(** @see [3] 3.4.1 *)
+
+TYPE
+    RU_REAL : REAL;             (* elementary *)
+END_TYPE

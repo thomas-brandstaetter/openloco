@@ -1,0 +1,8 @@
+(** @see [2] Example 3.6 *)
+
+TYPE
+    LongFloatNum    : LREAL;            (* direct derivation from IEC data type *)
+    FloatingPoint   : LongFloatNum;     (* direct derivation from a user-defined data type *)
+    InitFloatNum    : LREAL := 1.0;     (* derivation with new initial value *)
+    tControl        : BOOL := TRUE      (* derivation with new initial value *)
+END_TYPE

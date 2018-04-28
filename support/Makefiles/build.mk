@@ -2,6 +2,7 @@ DEBUG_DIR=/build/debug
 
 build_dirs:
 	mkdir -p build/debug
+	mkdir -p build/coverage
 	mkdir -p build/xcode-debug
 	mkdir -p build/msvs-debug
 

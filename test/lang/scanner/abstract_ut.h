@@ -3,8 +3,9 @@
 #include <gtest/gtest.h>
 
 #include <lang/driver.h>
-#include <parser.hh>
 #include <lang/scanner.h>
+
+#include <parser.hh>
 
 
 class abstract_scanner_ut : public ::testing::Test {

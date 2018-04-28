@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "abstract_ut.h"
+#include "../abstract_ut.h"
 
 using openloco::lang::parser;
 

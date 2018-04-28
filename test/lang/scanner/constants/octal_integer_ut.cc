@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "abstract_ut.h"
+#include "../abstract_ut.h"
 
 class octal_integer_test : public abstract_scanner_ut { };
 

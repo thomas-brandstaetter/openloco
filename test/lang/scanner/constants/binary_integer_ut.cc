@@ -4,50 +4,46 @@
 
 #include <gtest/gtest.h>
 
-#include "abstract_ut.h"
+#include "../abstract_ut.h"
 
-class hex_integer_test : public abstract_scanner_ut { };
+class binary_integer_test : public abstract_scanner_ut { };
 
-TEST_F(hex_integer_test, match_555) {
-    std::stringstream input;
-    input << "16#555";
+TEST_F(binary_integer_test, match_555) {
+    input << "2#111";
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(7, result_value);
 }
 
-TEST_F(hex_integer_test, match_555_w_underscore_position_front) {
-    std::stringstream input;
-    input << "16#5_55";
+TEST_F(binary_integer_test, match_555_w_underscore_position_front) {
+    input << "2#1_11";
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(7, result_value);
 }
 
-TEST_F(hex_integer_test, match_555_w_underscore_position_middle) {
-    std::stringstream input;
-    input << "16#55_5";
+TEST_F(binary_integer_test, match_555_w_underscore_position_middle) {
+    input << "2#11_1";
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(7, result_value);
 }
 
-TEST_F(hex_integer_test, match_555_w_underscore_position_end) {
-    std::stringstream input;
-    input << "16#555_";
+TEST_F(binary_integer_test, match_555_w_underscore_position_end) {
+    input << "2#111_";
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(7, result_value);
 }

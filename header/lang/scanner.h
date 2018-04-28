@@ -22,16 +22,41 @@ namespace lang {
         virtual ~scanner() {}
         virtual openloco::lang::parser::symbol_type yylex(openloco::lang::driver &driver);
 
-        /** EOL advanches as symbol */
-        void set_scan_eol();
-        /** Treat EOL as whitespace */
-        void unset_scan_eol();
-        bool is_scan_eol();
 
-        void yyerror(const char* message);
+        /** \addtogroup Scanner control */
+        /** @{ */
+        void reset(std::istream* input_file);
+        void reset(std::istream& input_file);
+
+        void set_scan_eol();            /**< Scanner treats EOL as symbol */
+        void unset_scan_eol();          /**< Scanner treats EOL as whitespace */
+        /** @} */
+
+        void yyerror(const char* message, location loc);
+
+        location loc;
 
     private:
-        void remove_underscore(std::string& str_value);
+
+
+        /** \addtogroup Number helper */
+        /** @{ */
+        void reset_location();
+        /** @{ */
+
+
+        /** \addtogroup Number helper */
+        /** @{ */
+
+        /**
+         * @example
+         *      (2, "2#1101_0010") --> 11010010
+         * @param erease_end
+         */
+        void cleanup_number(const unsigned long erease_end, std::string& str_value) const  ;
+        /** @} */
+
+
 
         driver &_driver;
         bool _scan_eol;

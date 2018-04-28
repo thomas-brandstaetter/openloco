@@ -304,10 +304,27 @@ openloco::lang::scanner::yyerror(const char* message)
 }
 
 void
-openloco::lang::scanner::remove_underscore(std::string& str_value)
-{
-    str_value.erase(
-        std::remove(str_value.begin(), str_value.end(), '_'),
-        str_value.end()
-    );
+openloco::lang::scanner::cleanup_number(const unsigned long erease_end, std::string& str_value) const {
+    str_value.erase(0,erease_end);
+    std::remove(str_value.begin(), str_value.end(), '_');
+}
+
+void
+openloco::lang::scanner::reset(std::istream* input_file) {
+    yyrestart(input_file);
+    reset_location();
+}
+
+void
+openloco::lang::scanner::reset(std::istream& input_file) {
+    yyrestart(input_file);
+    reset_location();
+}
+
+void
+openloco::lang::scanner::reset_location() {
+    loc.begin.column = 1;
+    loc.end.column = 1;
+    loc.begin.line = 1;
+    loc.end.line = 1;
 }

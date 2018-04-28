@@ -1,3 +1,4 @@
+#line 1 "0.yy"
 file
     : library_element_name END { YYACCEPT; }
     | library_element_declaration END { YYACCEPT; }

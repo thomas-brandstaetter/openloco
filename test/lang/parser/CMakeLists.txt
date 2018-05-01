@@ -5,24 +5,27 @@ add_executable(
 
 target_link_libraries(
     testfile_runner
-    parser
+    parser ${GTEST_BOTH_LIBRARIES}
 )
 
-# ----------------------------------------------------------------------------
-#   1.3
-# ----------------------------------------------------------------------------
+add_custom_command(
+    OUTPUT ${BIN_DIR}/test_runner
+    DEPENDS testfile_runner
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_BINARY_DIR}/test_runner
+        ${BIN_DIR}/test_runner
+    COMMENT "message test"
+)
 
-testfile_runner (TESTFILE 13/type_with_array.0)
-testfile_runner (TESTFILE 13/type_with_elementary.0)
-testfile_runner (TESTFILE 13/type_with_enumerated.0)
-testfile_runner (TESTFILE 13/type_with_multiple_subtypes.0)
-testfile_runner (TESTFILE 13/type_with_struct.0)
-testfile_runner (TESTFILE 13/type_with_subrange.openloco)
 
-# ----------------------------------------------------------------------------
-#   extra
-# ----------------------------------------------------------------------------
+file(GLOB_RECURSE testfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 13_data_types/*.[0-2])
+foreach(file ${testfiles})
+    testfile_runner( TESTFILE ${file})
+endforeach()
 
-testfile_runner (TESTFILE extra/nested_comments.1)
-testfile_runner (TESTFILE extra/newline_in_comments.openloco)
-testfile_runner (TESTFILE extra/single_comments.0)
+file(GLOB_RECURSE testfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} extra/*.[0-2])
+foreach(file ${testfiles})
+    testfile_runner( TESTFILE ${file})
+endforeach()
+

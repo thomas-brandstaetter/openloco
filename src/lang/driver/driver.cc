@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <header/lang/scanner.h>
-#include <header/lang/driver.h>
+#include <scanner/scanner.h>
+#include <driver/driver.h>
 
 
 int
@@ -14,10 +14,8 @@ openloco::lang::driver::parse(std::istream& in, std::ostream& out) {
     openloco::lang::parser parser {*this, scanner};
 
     scanner.yyrestart(in);
-    if (_debug) {
-        scanner.set_debug(_debug);
-    }
-    //parser.set_debug_level(1);
+    scanner.set_debug(1);
+    parser.set_debug_level(false);
     int res = parser.parse();
 
     return res;
@@ -36,4 +34,9 @@ openloco::lang::driver::parse(std::ifstream &input) {
 int
 openloco::lang::driver::parse() {
     return parse(std::cin, std::cout);
+}
+
+void
+openloco::lang::driver::add_token(std::string token) {
+    _tokens.push_back(token);
 }

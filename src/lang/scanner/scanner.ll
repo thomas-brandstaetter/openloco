@@ -1,22 +1,25 @@
 %{
-    #include <stdio.h>
+    #include <iostream>
+    #include <algorithm>
 
-    #include <header/lang/driver.h>
-    #include <header/lang/scanner.h>
-    #include <header/lang/ast.h>
+    #include <driver/driver.h>
+    #include <scanner/scanner.h>
+    #include <ast/ast.h>
     #include <parser.hh>
     #include <location.hh>
+    #include <util/debug.h>
 
-    static openloco::lang::location loc;
+    #define YY_USER_ACTION loc.columns(yyleng);
 
-    extern FILE * yyin;
-
-    #define YY_USER_ACTION loc.step(); loc.columns(yyleng);
+    //extern FILE * yyin;
 
     #undef  YY_DECL
     #define YY_DECL openloco::lang::parser::symbol_type openloco::lang::scanner::yylex(openloco::lang::driver &driver)
 
     #define yyterminate() return openloco::lang::parser::make_END(loc);
+
+    volatile bool sbcs_empty = true;
+    volatile bool dbcs_empty = true;
 %}
 
 %option debug
@@ -52,14 +55,16 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 %%
 
-%{                          /* Code executed at the beginning of yylex */
+%{  /* Code executed each time yylex is called */
+    loc.step();
 %}
 
     /** @see [1] 2.1.5 */
 
 "(*"                        { BEGIN(COMMENT); }
 <COMMENT>"*)"               { BEGIN(INITIAL); }
-<COMMENT>"(*"               { yyerror( "E.1 [2.1.5]: Nested comments" ); }
+<COMMENT>"(*"               { yyerror( "E.1 [2.1.5]: Nested comments", loc ); }
+<COMMENT><<EOF>>            { yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc ); }
 <COMMENT>\n                 { }
 <COMMENT>.                  { }
 
@@ -123,6 +128,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "IF"                        { return parser::make_IF(loc); }
 "INITIAL_STEP"              { return parser::make_INITIAL_STEP(loc); }
 "INT"                       { return parser::make_INT(loc); }
+"INTERVAL"                  { return parser::make_INTERVAL(loc); }
 "LINT"                      { return parser::make_LINT(loc); }
 "LREAL"                     { return parser::make_LREAL(loc); }
 "LWORD"                     { return parser::make_LWORD(loc); }
@@ -142,6 +148,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "RETAIN"                    { return parser::make_RETAIN(loc); }
 "RETURN"                    { return parser::make_RETURN(loc); }
 "R_EDGE"                    { return parser::make_R_EDGE(loc); }
+"SINGLE"                    { return parser::make_SINGLE(loc); }
 "SINT"                      { return parser::make_SINT(loc); }
 "STEP"                      { return parser::make_STEP(loc); }
 "STRING"                    { return parser::make_STRING(loc); }
@@ -175,11 +182,15 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "WSTRING"                   { return parser::make_WSTRING(loc); }
 "XOR"                       { return parser::make_XOR(loc); }
 
+"%"                         { return parser::make_PERCENT(loc); }
 ":"                         { return parser::make_COLON(loc); }
 ";"                         { return parser::make_SEMICOLON(loc); }
 "#"                         { return parser::make_NUM(loc); }
 "("                         { return parser::make_LPAR(loc); }
 ")"                         { return parser::make_RPAR(loc); }
+"["                         { return parser::make_LSQUAREB(loc); }
+"]"                         { return parser::make_RSQUAREB(loc); }
+"."                         { return parser::make_DOT(loc); }
 ".."                        { return parser::make_DDOT(loc); }
 ","                         { return parser::make_COMMA(loc); }
 ":="                        { return parser::make_DEF(loc); }
@@ -187,14 +198,13 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "-"                         { return parser::make_MINUS(loc); }
 "*"                         { return parser::make_STAR(loc); }
 "**"                        { return parser::make_SSTAR(loc); }
+"=>"                        { return parser::make_MOVE_TO(loc); }
 
     /* B.1 Common elements */
     /* B.1.1 Letters, digits and identifiers */
 
-({LETTER}|_)(({LETTER}|{DIGIT}|_))+   {
+({LETTER})(({LETTER}|{DIGIT}|_))+   {
         std::string value(yytext, static_cast<size_t>(yyleng));
-        std::cout << value << std::endl;
-
         return parser::make_IDENTIFIER(value, loc);
     }
 
@@ -203,8 +213,9 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 {DIGIT}(_?{DIGIT})*         {
 
+        /* INTEGER */
         std::string str_value(yytext, static_cast<size_t>(yyleng));
-        remove_underscore(str_value);
+        cleanup_number(0, str_value);
         long value = strtol( str_value.c_str(), NULL, 10);
 
         return parser::make_INTEGER(value, loc);
@@ -213,8 +224,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "2#"{BIT}(_?{BIT})*         {
 
         std::string str_value(yytext, yyleng);
-        str_value.erase(0,2);
-        remove_underscore(str_value);
+        cleanup_number(2, str_value);
         long value = strtol( str_value.c_str(), NULL, 2);
 
         return parser::make_BINARY_INTEGER(value, loc);
@@ -223,8 +233,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "8#"{OCTAL_DIGIT}(_?{OCTAL_DIGIT})* {
 
         std::string str_value(yytext, yyleng);
-        str_value.erase(0,2);
-        remove_underscore(str_value);
+        cleanup_number(2, str_value);
         long value = strtol( str_value.c_str(), NULL, 8);
 
         return parser::make_OCTAL_INTEGER(value, loc);
@@ -233,8 +242,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "16#"{HEX_DIGIT}(_?{HEX_DIGIT})*    {
 
         std::string str_value(yytext, yyleng);
-        str_value.erase(0,3);
-        remove_underscore(str_value);
+        cleanup_number(3, str_value);
         long value = strtol( str_value.c_str(), NULL, 16);
 
         return parser::make_HEX_INTEGER(value, loc);
@@ -243,7 +251,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 {FIXED_POINT} {
 
         std::string str_value(yytext, yyleng);
-        remove_underscore(str_value);
+        cleanup_number(0, str_value);
         double value = strtod( str_value.c_str(), NULL);
 
         return parser::make_FIXED_POINT(value, loc);
@@ -252,61 +260,87 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 '  { BEGIN(SB_STRING); }
 
 <SB_STRING>{SINGLE_BYTE_CHARACTER_REPRESENTATION}* {
+
+        sbcs_empty = false;
         std::string str_value { yytext };
         return parser::make_SINGLE_BYTE_CHARACTER_STRING(str_value, loc);
     }
 
-<SB_STRING>' { BEGIN(0); }
+<SB_STRING>' {
+
+    BEGIN(0);
+
+    const char *cstr_value = (sbcs_empty) ? "" : yytext;
+    std::string str_value { cstr_value };
+
+    sbcs_empty = true;
+    return parser::make_SINGLE_BYTE_CHARACTER_STRING(str_value, loc);
+}
 
 \" { BEGIN(DB_STRING); }
 
 <DB_STRING>{DOUBLE_BYTE_CHARACTER_REPRESENTATION}* {
+
+        dbcs_empty = false;
         std::string str_value { yytext };
         return parser::make_DOUBLE_BYTE_CHARACTER_STRING(str_value, loc);
     }
 
-<DB_STRING>\" { BEGIN(0); }
+<DB_STRING>\" {
+    BEGIN(0);
+
+    const char *cstr_value = (dbcs_empty) ? "" : yytext;
+    std::string str_value { cstr_value };
+
+    dbcs_empty = true;
+    return parser::make_DOUBLE_BYTE_CHARACTER_STRING(str_value, loc);
+}
 
 
 
 [\t ]                   { loc.step(); }
 
-\n                      {   loc.step();
-                            loc.columns(yyleng);
-                            if (is_scan_eol()) return openloco::lang::parser::make_EOL(loc);
+\n                      {
+                            /* EOL */
+                            std::cerr << "** _scan_eol: " << _scan_eol << std::endl;
+                            loc.lines(yyleng);
+                            loc.step();
+                            if (_scan_eol)
+                                return openloco::lang::parser::make_EOL(loc);
                         }
 
 <<EOF>>                 { return openloco::lang::parser::make_END(loc); }
 
-.                       { std::cerr << "unrecognized character" << std::endl; /*exit(1);*/ }
+.                       { return openloco::lang::parser::make_SCANNER_ERROR(loc); }
 
 %%
 
 
 void
-openloco::lang::scanner::set_scan_eol()     { _scan_eol = true; }
+openloco::lang::scanner::set_scan_eol() {
+    _scan_eol = true;
+}
 
 void
-openloco::lang::scanner::unset_scan_eol()   { _scan_eol = false; }
-
-bool
-openloco::lang::scanner::is_scan_eol()      { return _scan_eol; }
-
+openloco::lang::scanner::unset_scan_eol() {
+    _scan_eol = false;
+}
 
 void
-openloco::lang::scanner::yyerror(const char* message)
+openloco::lang::scanner::yyerror(const char* message, location loc)
 {
     std::cerr
         << "syntax error at: " << loc << "\n"
-        << yytext << "\n"
         << message
         << std::endl;
 }
 
 void
 openloco::lang::scanner::cleanup_number(const unsigned long erease_end, std::string& str_value) const {
-    str_value.erase(0,erease_end);
-    std::remove(str_value.begin(), str_value.end(), '_');
+
+    if (erease_end > 1)
+        str_value.erase(0,erease_end);
+    str_value.erase(std::remove(str_value.begin(), str_value.end(), '_'), str_value.end());
 }
 
 void

@@ -7,4 +7,5 @@ openloco::lang::parser::error(const location_type &loc, const std::string& messa
         << "parser error at "
         << loc
         << ": " << message << std::endl;
+    std::cerr << std::flush;
 }

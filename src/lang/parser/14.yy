@@ -3,23 +3,23 @@
     // B.1.4. Variables
     // -----------------------------------------------------------------------
 
-    // variable
-    //     : direct_variable
-    //     | symbolic_variable
-    //     ;
+variable
+    : direct_variable
+    | symbolic_variable
+    ;
 
 symbolic_variable
-    : IDENTIFIER
+    : variable_name
     | multi_element_variable
     ;
 
-// variable_name: IDENTIFIER;
+variable_name: IDENTIFIER;
 
     // -----------------------------------------------------------------------
     // B.1.4.1 Directly represented variables
     // -----------------------------------------------------------------------
 
-direct_variable: "%" location_prefix size_prefix INTEGER directive_variable__positions;
+direct_variable: PERCENT location_prefix size_prefix INTEGER directive_variable__positions;
 
 directive_variable__positions
     : "." INTEGER directive_variable__positions
@@ -55,7 +55,7 @@ array_variable: subscripted_variable subscript_list;
 
 subscripted_variable: symbolic_variable;
 
-subscript_list: "[" subscript subscript_list__subscripts "]";
+subscript_list: LSQUAREB subscript subscript_list__subscripts RSQUAREB;
 
 subscript_list__subscripts
     : subscript_list__subscripts "," subscript
@@ -77,13 +77,13 @@ field_selector: IDENTIFIER;
     // -----------------------------------------------------------------------
 
 input_declarations
-    : "VAR_INPUT" RETAIN input_declaration SEMICOLON input_declarations__declarations END_VAR
-    | "VAR_INPUT" "NON_RETAIN" input_declaration SEMICOLON input_declarations__declarations END_VAR
-    | "VAR_INPUT" input_declaration SEMICOLON input_declarations__declarations END_VAR;
+    : VAR_INPUT RETAIN input_declaration SEMICOLON ids__declarations END_VAR
+    | VAR_INPUT NON_RETAIN input_declaration SEMICOLON ids__declarations END_VAR
+    | VAR_INPUT input_declaration SEMICOLON ids__declarations END_VAR;
 
 
-input_declarations__declarations
-    : input_declarations__declarations input_declaration SEMICOLON
+ids__declarations
+    : ids__declarations input_declaration SEMICOLON
     |
     ;
 
@@ -93,9 +93,14 @@ input_declaration
     ;
 
 edge_declaration
-    : var1_list COLON BOOL R_EDGE
-    | var1_list COLON BOOL F_EDGE
-    | var1_list COLON BOOL;
+    : var1_list COLON BOOL ed_edge
+    ;
+
+ed_edge
+    : R_EDGE
+    | F_EDGE
+    |
+    ;
 
 var_init_decl
     : var1_init_decl
@@ -130,14 +135,14 @@ fb_name_decl
     | fb_name_list COLON IDENTIFIER DEF structure_initialization;
 
 
-fb_name_list: IDENTIFIER identifier_list__;
+fb_name_list: fb_name fnl_names;
 
-    // fb_name_list__names
-    //     :  fb_name_list__names "," IDENTIFIER
-    //     |
-    //     ;
+fnl_names
+    :  fnl_names COMMA fb_name
+    |
+    ;
 
-// fb_name: IDENTIFIER;
+fb_name: IDENTIFIER;
 
 output_declarations
     : VAR_OUTPUT RETAIN var_init_decl SEMICOLON  output_declarations__init_decls END_VAR
@@ -162,10 +167,11 @@ var_declaration
     | fb_name_decl
     ;
 
+    // TODO
 temp_var_decl
     : var1_declaration
     | array_var_declaration
-//    | structured_var_declaration
+    | structured_var_declaration
     | string_var_declaration
     ;
 
@@ -176,31 +182,36 @@ var1_declaration
 
 array_var_declaration: var1_list COLON array_specification;
 
-// structured_var_declaration: var1_list COLON IDENTIFIER;
+structured_var_declaration: var1_list COLON IDENTIFIER;
 
-var_declarations: VAR CONSTANT var_init_decl SEMICOLON  var_declarations__init_decls  END_VAR;
+var_declarations: VAR CONSTANT vd__declarations END_VAR;
 
-var_declarations__init_decls
-    : var_declarations__init_decls var_init_decl SEMICOLON
-    |
+vd__declarations
+    : vd__declarations var_init_decl SEMICOLON
+    | var_init_decl SEMICOLON
     ;
 
-retentive_var_declarations: VAR RETAIN var_init_decl SEMICOLON retentive_var_declarations__init_decls END_VAR;
+retentive_var_declarations: VAR RETAIN rvd__declarations END_VAR;
 
-retentive_var_declarations__init_decls
-    : retentive_var_declarations__init_decls var_init_decl SEMICOLON
-    |
+rvd__declarations
+    : rvd__declarations var_init_decl SEMICOLON
+    | var_init_decl SEMICOLON
     ;
 
 located_var_declarations
-    : VAR CONSTANT located_var_decl SEMICOLON located_var_declarations__decls END_VAR
-    | VAR RETAIN located_var_decl SEMICOLON located_var_declarations__decls END_VAR
-    | VAR NON_RETAIN located_var_decl SEMICOLON located_var_declarations__decls END_VAR
-    | VAR located_var_decl SEMICOLON located_var_declarations__decls END_VAR ;
+    : VAR lvd__retain lvd__declarations END_VAR
+    ;
 
-located_var_declarations__decls
-    : located_var_declarations__decls located_var_decl SEMICOLON
+lvd__retain
+    : CONSTANT
+    | RETAIN
+    | NON_RETAIN
     |
+    ;
+
+lvd__declarations
+    : lvd__declarations located_var_decl SEMICOLON
+    | located_var_decl SEMICOLON
     ;
 
 located_var_decl
@@ -208,12 +219,16 @@ located_var_decl
     | location COLON located_var_spec_init;
 
 external_var_declarations
-    : "VAR_EXTERNAL" "CONSTANT" external_declaration SEMICOLON external_var_declaration__declarations END_VAR
-    | "VAR_EXTERNAL" external_declaration SEMICOLON external_var_declaration__declarations END_VAR;
+    : VAR_EXTERNAL evd__retain evd__declarations END_VAR
 
-external_var_declaration__declarations
-    : external_var_declaration__declarations external_declaration SEMICOLON
+evd__retain
+    : CONSTANT
     |
+    ;
+
+evd__declarations
+    : evd__declarations external_declaration SEMICOLON
+    | external_declaration SEMICOLON
     ;
 
     // TODO function_block_type_name
@@ -222,33 +237,38 @@ external_declaration
     | global_var_name COLON subrange_specification
     | global_var_name COLON enumerated_specification
     | global_var_name COLON array_specification
-    // | global_var_name COLON structure_type_name
+    | global_var_name COLON structure_type_name
     // | global_var_name COLON IDENTIFIER;
     ;
 
 global_var_name: IDENTIFIER;
 
-    // global_var_declarations
-    //     : "VAR_GLOBAL" RETAIN global_var_decl SEMICOLON  global_var_declarations__decls END_VAR
-    //     | "VAR_GLOBAL" "NON_RETAIN" global_var_decl SEMICOLON  global_var_declarations__decls END_VAR
-    //     | "VAR_GLOBAL" global_var_decl SEMICOLON  global_var_declarations__decls END_VAR;
+global_var_declarations
+    : VAR_GLOBAL gvds__retain global_var_decl SEMICOLON gvds__declarations END_VAR
+    ;
 
-    //global_var_declarations__decls
-    //    : global_var_declarations__decls global_var_decl SEMICOLON
-    //    |
-    //    ;
+gvds__retain
+    : RETAIN
+    | CONSTANT
+    |
+    ;
 
-    // TODO function_block_type_name
-    // global_var_decl
-    //     : global_var_spec COLON located_var_spec_init
-    //     | global_var_spec COLON IDENTIFIER
-    //     ;
+gvds__declarations
+   : gvds__declarations global_var_decl SEMICOLON
+   | global_var_decl SEMICOLON
+   ;
 
-    // global_var_spec
-    //     : global_var_list
-    //     | location
-    //     | global_var_name location
-    //     ;
+    // TODO: function_block_type_name
+global_var_decl
+    : global_var_spec COLON located_var_spec_init
+    | global_var_spec COLON IDENTIFIER
+    ;
+
+global_var_spec
+    : global_var_list
+    | location
+    | global_var_name location
+    ;
 
 located_var_spec_init
     : simple_spec_init
@@ -260,14 +280,14 @@ located_var_spec_init
     | double_byte_string_spec
     ;
 
-location: "AT" direct_variable
+location: AT direct_variable
 
-    // global_var_list: global_var_name global_var_list__names;
+global_var_list: global_var_name global_var_list__names;
 
-    // global_var_list__names
-    //     : global_var_list__names "," global_var_name
-    //     |
-    //     ;
+global_var_list__names
+    : global_var_list__names "," global_var_name
+    |
+    ;
 
 string_var_declaration
     : single_byte_string_var_declaration
@@ -277,40 +297,43 @@ string_var_declaration
 single_byte_string_var_declaration: var1_list COLON single_byte_string_spec;
 
 single_byte_string_spec
-    : "STRING" "[" INTEGER "]"
-    | "STRING" DEF DOUBLE_BYTE_CHARACTER_STRING
-    | "STRING" "[" INTEGER "]" DEF DOUBLE_BYTE_CHARACTER_STRING
+    : STRING LSQUAREB INTEGER RSQUAREB
+    | STRING DEF DOUBLE_BYTE_CHARACTER_STRING
+    | STRING LSQUAREB INTEGER RSQUAREB DEF DOUBLE_BYTE_CHARACTER_STRING
     ;
 
 double_byte_string_var_declaration: var1_list COLON double_byte_string_spec;
 
 double_byte_string_spec
-    : "WSTRING" "[" INTEGER "]"
-    | "WSTRING" DEF DOUBLE_BYTE_CHARACTER_STRING
-    | "WSTRING" "[" INTEGER "]" DEF DOUBLE_BYTE_CHARACTER_STRING
+    : WSTRING LSQUAREB INTEGER RSQUAREB
+    | WSTRING DEF DOUBLE_BYTE_CHARACTER_STRING
+    | WSTRING LSQUAREB INTEGER RSQUAREB DEF DOUBLE_BYTE_CHARACTER_STRING
     ;
 
 incompl_located_var_declarations
     : VAR RETAIN incompl_located_var_decl SEMICOLON incompl_located_var_decl END_VAR
     | VAR NON_RETAIN incompl_located_var_decl SEMICOLON incompl_located_var_decl END_VAR
-    | VAR incompl_located_var_decl SEMICOLON incompl_located_var_decl END_VAR;
+    | VAR incompl_located_var_decl SEMICOLON incompl_located_var_decl END_VAR
+    ;
 
 
-incompl_located_var_decl: IDENTIFIER incompl_location COLON var_spec;
+incompl_located_var_decl
+    : IDENTIFIER incompl_location COLON var_spec
+    ;
 
 incompl_location
-    : "AT" "%" "I" "*"
-    | "AT" "%" "M" "*"
-    | "AT" "%" "Q" "*";
+    : AT PERCENT "I" STAR
+    | AT PERCENT "M" STAR
+    | AT PERCENT "Q" STAR
+    ;
 
 var_spec
     : IDENTIFIER
     | subrange_specification
     | enumerated_specification
     | array_specification
-    // | IDENTIFIER
-    | "STRING" "[" INTEGER "]"
-    | "WSTRING" "[" INTEGER "]"
-    | "STRING"
-    | "WSTRING"
+    | STRING LSQUAREB INTEGER RSQUAREB
+    | WSTRING LSQUAREB INTEGER RSQUAREB
+    | STRING
+    | WSTRING
     ;

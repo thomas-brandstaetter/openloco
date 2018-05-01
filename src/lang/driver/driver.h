@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace openloco {
 namespace lang {
@@ -71,28 +72,38 @@ namespace lang {
 
         date_calculator dc;
 
+        /** \addtogroup Constructors */
+        /** @{ */
         driver() :
-            _debug(true),
-            dc()
+            dc(),
+            _tokens(),
+            _debug(false)
         {
         }
+        /** @} */
 
         virtual ~driver()
         {
         }
 
+        /** \addtogroup Parsing */
+        /** @{ */
         int parse(std::istream& in, std::ostream& out);
         int parse(std::stringstream &input);
         int parse(std::ifstream &input);
         int parse(FILE *file);
         int parse();
+        /** @} */
 
         void set_debug(bool value) { _debug = value; }
+        void add_token(std::string token);
 
         friend class parser;
         friend class scanner;
 
     private:
+
+        std::vector<std::string> _tokens;
         bool _debug;
     };
 }}

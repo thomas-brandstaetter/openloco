@@ -1,4 +1,4 @@
-
+#line 1 "preamble.yy"
 %skeleton "lalr1.cc"
 %require  "3.0"
 
@@ -9,22 +9,21 @@
 %define api.token.constructor
 %define parse.assert true
 //%define parse.error verbose
-%debug
+//%debug
 %locations
 
 
 %glr-parser
-%expect 2
-%expect-rr 0
-
+%expect 6
+%expect-rr 5
 
 
 %param {openloco::lang::driver &driver}
 %parse-param {openloco::lang::scanner &scanner}
 
 %code requires {
-
-    #include <header/lang/ast.h>
+    #include <ast/ast.h>
+    #include <boost/variant.hpp>
 
     namespace openloco {
     namespace lang {
@@ -33,17 +32,18 @@
     }}
 
     #define YY_NULLPTR nullptr
+    //#define YYERROR_VERBOSE 1
 }
 
 %{
-    #define YYDEBUG 1
+    //#define YYDEBUG 1
 
     #include <cmath>
     #include <cassert>
     #include <iostream>
 
-    #include <header/lang/driver.h>
-    #include <header/lang/scanner.h>
+    #include <driver/driver.h>
+    #include <scanner/scanner.h>
 
     #include <parser.hh>
     #include <location.hh>
@@ -52,7 +52,7 @@
     #define yylex scanner.yylex
 %}
 
-
+#line 60 "preamble.yy"
 %token END EOF_ EOL
 
 %token ACTION
@@ -113,6 +113,7 @@
 %token IF
 %token INITIAL_STEP
 %token INT
+%token INTERVAL
 %token LINT
 %token LREAL
 %token LWORD
@@ -132,6 +133,7 @@
 %token RETAIN
 %token RETURN
 %token R_EDGE
+%token SINGLE
 %token SINT
 %token STEP
 %token STRING
@@ -165,12 +167,13 @@
 %token WSTRING
 %token XOR
 
-%token COLON SEMICOLON NUM LPAR RPAR DDOT COMMA DEF PLUS MINUS STAR SSTAR
+%token PERCENT COLON SEMICOLON NUM LPAR RPAR LSQUAREB RSQUAREB DOT DDOT COMMA DEF PLUS MINUS STAR SSTAR MOVE_TO
+
+%token SCANNER_ERROR
 
 %token <std::string>    IDENTIFIER
 
     // B.1.2.1 Numeric literals
-
 %type  <ast::value_wrapper<long>>               numeric_literal
 %type  <ast::value_wrapper<long>>               integer_literal
 %type  <ast::value_wrapper<long>>               integer_literal_value
@@ -187,37 +190,65 @@
 %type  <ast::value_wrapper<bool>>               boolean_literal_value
 
     // B.1.2.2 Character strings
-%token <std::string>    SINGLE_BYTE_CHARACTER_STRING
-%token <std::string>    DOUBLE_BYTE_CHARACTER_STRING
+%token <std::string>        SINGLE_BYTE_CHARACTER_STRING
+%token <std::string>        DOUBLE_BYTE_CHARACTER_STRING
+%type  <ast::value_wrapper<std::string>>        character_string
 
-
-%token <double>         FIXED_POINT
 %token <double>         MANTISSA
+
+    // B.1.2.3 Time literals
+%type  <double>                              time_literal
+
+    // B.1.2.3.1 Duration
+%type  <double>               duration
+%type  <double>               interval
+%type  <double>               days
+%token <double>               FIXED_POINT
+%type  <double>               hours
+%type  <double>               minutes
+%type  <double>               seconds
+%type  <double>               milliseconds
+
+    // B.1.2.3.2 Time of day and date
+%type  <ast::time_of_day>     time_of_day
+%type  <ast::daytime>         daytime
+%type  <long>                 day_hour
+%type  <long>                 day_minute
+%type  <long>                 day_second
+
+%type  <ast::date_literal>         date
+%type  <ast::date_literal>         date_literal
+%type  <long>                 year
+%type  <long>                 month
+%type  <long>                 day
+
+%type  <ast::date_and_time>     date_and_time
+
 
     // B.1.3 Data types
 
 %type  <ast::value_wrapper<ast::elementary_type_name>>  data_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  non_generic_type_name
+%type  <ast::non_generic_type_name>  non_generic_type_name
 
     // B.1.3.1 Elementary data types
-
-%type  <ast::value_wrapper<ast::elementary_type_name>>  elementary_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  numeric_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  integer_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  signed_integer_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  unsigned_integer_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  real_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  date_type_name
-%type  <ast::value_wrapper<ast::elementary_type_name>>  bit_string_type_name
+%type  <ast::elementary_type_name>  elementary_type_name
+%type  <ast::elementary_type_name>  numeric_type_name
+%type  <ast::elementary_type_name>  integer_type_name
+%type  <ast::elementary_type_name>  signed_integer_type_name
+%type  <ast::elementary_type_name>  unsigned_integer_type_name
+%type  <ast::elementary_type_name>  real_type_name
+%type  <ast::elementary_type_name>  date_type_name
+%type  <ast::elementary_type_name>  bit_string_type_name
 
 
     // B.1.3.2 GENERIC data types
 
-%type  <ast::value_wrapper<ast::generic_type_name>>     generic_type_name
+%type  <ast::generic_type_name>     generic_type_name
 
     // B.1.3.3 GENERIC data types
 
-%type  <ast::value_wrapper<std::string>>        derived_type_name
+%type  <std::string>        derived_type_name
+%type  <ast::string_type_declaration>           string_type_declaration
 
 %start file
 %%

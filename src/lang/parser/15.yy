@@ -225,7 +225,9 @@ function_block_body: "FUNCTION_BLOCK_PLACEHOLDER"
     // B.1.5.3 Programs
     // -----------------------------------------------------------------------
 
-    // program_type_name: IDENTIFIER;
+program_type_name
+    : IDENTIFIER
+    ;
 
 program_declaration:
     PROGRAM IDENTIFIER
@@ -248,16 +250,18 @@ program_declaration_var
 
 program_access_decls:
      VAR_ACCESS program_access_decl SEMICOLON
-        program_access_decls__declarations
+        pad__declarations
      END_VAR
      ;
 
-program_access_decls__declarations
-    : program_access_decls__declarations program_access_decl SEMICOLON
+pad__declarations
+    : pad__declarations program_access_decl SEMICOLON
     |
     ;
 
-program_access_decl: IDENTIFIER COLON symbolic_variable COLON non_generic_type_name program_access_decl_direction;
+program_access_decl
+    : IDENTIFIER COLON symbolic_variable COLON non_generic_type_name program_access_decl_direction
+    ;
 
 program_access_decl_direction
     : direction

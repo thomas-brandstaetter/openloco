@@ -1,41 +1,38 @@
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-if (Win32)
-    include_directories(${CMAKE_SOURCE_DIR}\\header\\lang)
-endif ()
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(ADDITIONAL_SOURCES
         ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-        scanner.ll
+        scanner/scanner.ll
         )
 
-#find_program(
-#    mcpp_PATH
-#    mcpp
-#)
-
-set(mcpp_PATH /opt/local/bin/mcpp)
-
 # TODO: the one and only OS which have no cat is the by all beloved Microsoft Windows
+
+set(parser_yy_path ${CMAKE_CURRENT_BINARY_DIR}/parser.yy)
 
 add_custom_command(
     OUTPUT parser.yy
 
-    COMMAND cat parser/preamble.yy > ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/0.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/11-13.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/14.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/15.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/16.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/17.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/2.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/3.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
-    COMMAND cat parser/postamble.yy >> ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
+    COMMAND mkdir -p parser
+    COMMAND cat parser/preamble.yy > ${parser_yy_path}
+    COMMAND cat parser/0.yy >> ${parser_yy_path}
+    COMMAND cat parser/11.yy >> ${parser_yy_path}
+    COMMAND cat parser/12.yy >> ${parser_yy_path}
+    COMMAND cat parser/13.yy >> ${parser_yy_path}
+    COMMAND cat parser/14.yy >> ${parser_yy_path}
+    COMMAND cat parser/15.yy >> ${parser_yy_path}
+    COMMAND cat parser/16.yy >> ${parser_yy_path}
+    COMMAND cat parser/17.yy >> ${parser_yy_path}
+    COMMAND cat parser/2.yy >> ${parser_yy_path}
+    COMMAND cat parser/3.yy >> ${parser_yy_path}
+    COMMAND cat parser/postamble.yy >> ${parser_yy_path}
 
     DEPENDS parser/preamble.yy
     parser/0.yy
-    parser/11-13.yy
+    parser/11.yy
+    parser/12.yy
+    parser/13.yy
     parser/14.yy
     parser/15.yy
     parser/16.yy
@@ -55,26 +52,40 @@ BISON_TARGET(
     ${CMAKE_CURRENT_BINARY_DIR}/parser.yy
     ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
     VERBOSE
-    COMPILE_FLAGS "--defines --debug --verbose --graph --language=C++ --debug"
+    COMPILE_FLAGS "--language=C++"
 )
 
 FLEX_TARGET(
     lexer
-    scanner.ll
+    scanner/scanner.ll
     ${CMAKE_CURRENT_BINARY_DIR}/scanner.cc
-    COMPILE_FLAGS "-+ --debug"
+    COMPILE_FLAGS "-+"
 )
 
 ADD_FLEX_BISON_DEPENDENCY(lexer parser)
 
 add_definitions(-DYYDEBUG=1)
 
+
+set(parser_HEADERS
+    ast/common.h
+    ast/ast.h
+    driver/driver.h
+    scanner/scanner.h
+    driver/error.h
+    )
+
 add_library(
     parser
-    driver.cc
+    driver/driver.cc
+    driver/error.cc
     ${FLEX_lexer_OUTPUTS}
     ${BISON_parser_OUTPUTS}
-
     ${ADDITIONAL_SOURCES}
     ${parser_HEADERS}
 )
+
+
+
+add_executable(olc olc.cc)
+target_link_libraries(olc parser)

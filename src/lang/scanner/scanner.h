@@ -17,8 +17,13 @@ namespace lang {
 
     class scanner : public yyFlexLexer {
     public:
+
+        /** \addtogroup Constructors */
+        /** @{ */
         scanner(driver &driver) : yyFlexLexer(std::cin, std::cout), _driver(driver), _scan_eol(false) {}
         scanner(driver &driver, std::istream &in) : yyFlexLexer(in, std::cout), _driver(driver) {}
+        /** @} */
+
         virtual ~scanner() {}
         virtual openloco::lang::parser::symbol_type yylex(openloco::lang::driver &driver);
 
@@ -39,19 +44,18 @@ namespace lang {
     private:
 
 
-        /** \addtogroup Number helper */
+        /** \addtogroup Scanner control */
         /** @{ */
         void reset_location();
         /** @{ */
 
 
-        /** \addtogroup Number helper */
+        /** \addtogroup Helper */
         /** @{ */
 
         /**
          * @example
          *      (2, "2#1101_0010") --> 11010010
-         * @param erease_end
          */
         void cleanup_number(const unsigned long erease_end, std::string& str_value) const  ;
         /** @} */

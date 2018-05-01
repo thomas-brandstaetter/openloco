@@ -1,9 +1,12 @@
 #pragma once
 
+#include <sstream>
+#include <iostream>
+
 #include <gtest/gtest.h>
 
-#include <lang/driver.h>
-#include <lang/scanner.h>
+#include <driver/driver.h>
+#include <scanner/scanner.h>
 
 #include <parser.hh>
 

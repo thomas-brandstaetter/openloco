@@ -11,8 +11,8 @@
 
 #include <parser.hh>
 
-#include <lang/driver.h>
-#include <lang/scanner.h>
+#include <driver/driver.h>
+#include <scanner/scanner.h>
 #include "../abstract_ut.h"
 
 class syntax_error_test : public abstract_scanner_ut { };

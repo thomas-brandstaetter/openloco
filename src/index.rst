@@ -3,13 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to openloco - The Open Logic Controller's documentation!
+openloco - Open Logic Controller
 ================================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+openloco is a sompiler for the IEC 61131-3 textual programming languages.
 
 
 Indices and tables

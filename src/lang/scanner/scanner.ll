@@ -64,7 +64,11 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 "(*"                        { BEGIN(COMMENT); }
 <COMMENT>"*)"               { BEGIN(INITIAL); }
 <COMMENT>"(*"               { yyerror( "E.1 [2.1.5]: Nested comments", loc ); }
-<COMMENT><<EOF>>            { yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc ); }
+<COMMENT><<EOF>>            {
+        yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc );
+        BEGIN(INITIAL);
+        unput(EOF);
+    }
 <COMMENT>\n                 { }
 <COMMENT>.                  { }
 
@@ -300,9 +304,7 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 [\t ]                   { loc.step(); }
 
-\n                      {
-                            /* EOL */
-                            std::cerr << "** _scan_eol: " << _scan_eol << std::endl;
+\n                      {   /* EOL */
                             loc.lines(yyleng);
                             loc.step();
                             if (_scan_eol)

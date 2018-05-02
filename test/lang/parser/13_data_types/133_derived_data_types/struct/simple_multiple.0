@@ -1,0 +1,9 @@
+TYPE
+    struct1 :
+    STRUCT
+        element1 :      SUPER_REAL;
+        element2 :      UINT;
+        element3 :      LREAL := 3.141;
+        element4 :      SUPER_REAL := 2.7182;
+    END_STRUCT;
+END_TYPE

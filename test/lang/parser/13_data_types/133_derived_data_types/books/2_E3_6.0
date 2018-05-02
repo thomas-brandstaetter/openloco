@@ -1,0 +1,8 @@
+(** @see [2] Example 3.6 *)
+
+TYPE
+    LongFloatNum  : LREAL;
+    FloatingPoint : LongFloatNum;
+    InitFloatNum  : LREAL := 1.0;
+    tControl      : BOOL := TRUE;
+END_TYPE

@@ -1,0 +1,6 @@
+TYPE
+    TestBench :                                     (* structure *)
+    STRUCT
+        Colour :        (red, yellow, green);       (* enumeration *)
+    END_STRUCT;
+END_TYPE

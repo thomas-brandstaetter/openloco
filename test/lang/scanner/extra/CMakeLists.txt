@@ -7,6 +7,13 @@ unit_test(
 )
 
 unit_test(
+    TARGET  eol_ut
+    SOURCES eol_ut.cc
+    LIBRARIES parser
+    LINK_FLEX
+)
+
+unit_test(
     TARGET  line_count_ut
     SOURCES line_count_ut.cc
     LIBRARIES parser

@@ -1,0 +1,7 @@
+(* @see [2] Example 3.8 *)
+
+VAR
+    Field1 : ARRAY [1..12] OF SINT := [3,16#FF,-5,-9,-5,-9,-5,-9,-5,-9,0,0];
+    Field2 : ARRAY [1..12] OF SINT := [3,16#FF, 4(-5,-9), 2(0)];
+    Text : STRING [4] := 'stop';
+END_VAR

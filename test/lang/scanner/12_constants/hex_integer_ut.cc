@@ -12,7 +12,7 @@ TEST_F(hex_integer_test, match_555) {
     std::stringstream input;
     input << "16#555";
 
-    scanner.yyrestart(input);
+    scanner.reset(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
@@ -23,7 +23,7 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_front) {
     std::stringstream input;
     input << "16#5_55";
 
-    scanner.yyrestart(input);
+    scanner.reset(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
@@ -34,7 +34,7 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_middle) {
     std::stringstream input;
     input << "16#55_5";
 
-    scanner.yyrestart(input);
+    scanner.reset(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 
@@ -45,7 +45,7 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_end) {
     std::stringstream input;
     input << "16#555_";
 
-    scanner.yyrestart(input);
+    scanner.reset(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
     auto result_value = result.value.as<long>();
 

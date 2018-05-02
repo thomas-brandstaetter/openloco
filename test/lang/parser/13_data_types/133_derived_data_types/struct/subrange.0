@@ -1,0 +1,7 @@
+TYPE
+    struct1 :
+    STRUCT
+        Sensor :        INT (-56..128);
+    END_STRUCT;
+END_TYPE
+

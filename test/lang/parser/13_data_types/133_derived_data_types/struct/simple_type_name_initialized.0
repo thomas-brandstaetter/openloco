@@ -1,0 +1,6 @@
+TYPE
+    struct1 :
+    STRUCT
+        element4 :      SUPER_REAL := 2.7182;
+    END_STRUCT;
+END_TYPE

@@ -1,0 +1,6 @@
+TYPE
+    struct1 :
+    STRUCT
+        element1 :     custom_type_name;
+    END_STRUCT;
+END_TYPE

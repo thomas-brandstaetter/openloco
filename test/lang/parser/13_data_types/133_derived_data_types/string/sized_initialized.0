@@ -1,0 +1,3 @@
+TYPE
+    Text : STRING[10] := 'Hello Tom';
+END_TYPE

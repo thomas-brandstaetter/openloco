@@ -19,13 +19,14 @@ add_custom_command(
 )
 
 
+file(GLOB_RECURSE testfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 1_common_elements/*.[0-2])
+foreach(file ${testfiles})
+    testfile_runner( TESTFILE ${file})
+endforeach()
+
 file(GLOB_RECURSE testfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 13_data_types/*.[0-2])
 foreach(file ${testfiles})
     testfile_runner( TESTFILE ${file})
 endforeach()
 
-file(GLOB_RECURSE testfiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} extra/*.[0-2])
-foreach(file ${testfiles})
-    testfile_runner( TESTFILE ${file})
-endforeach()
 

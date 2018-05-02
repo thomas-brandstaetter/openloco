@@ -15,17 +15,10 @@
 
 
 class eof_test : public abstract_scanner_ut { };
+class eof_scanner_test : public abstract_scanner_ut { };
 
 using openloco::lang::parser;
 
-
-TEST_F(eof_test, match_eof) {
-    std::stringstream ss(EOF);
-
-    scanner.reset(ss);
-    parser::symbol_type result = scanner.yylex(driver);
-    ASSERT_EQ(result.token(), parser::token::END);
-}
 
 
 TEST_F(eof_test, match_empty_string) {
@@ -33,7 +26,7 @@ TEST_F(eof_test, match_empty_string) {
 
     scanner.reset(input);
     parser::symbol_type result = scanner.yylex(driver);
-    ASSERT_EQ(result.token(), parser::token::END);
+    ASSERT_EQ(parser::token::END, result.token());
 }
 
 
@@ -44,7 +37,7 @@ TEST_F(eof_test, token_after_identifier) {
     scanner.yylex(driver);
     scanner.yylex(driver);
     parser::symbol_type result = scanner.yylex(driver);
-    ASSERT_EQ(result.token(), parser::token::END);
+    ASSERT_EQ(parser::token::END, result.token());
 }
 
 TEST_F(eof_test, eof_location_after_identifier) {

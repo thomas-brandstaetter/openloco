@@ -1,0 +1,6 @@
+TYPE
+    TestBench :                                     (* structure *)
+    STRUCT
+        Light :     Colour := red;                  (* enumerated data type with initial value *)
+    END_STRUCT;
+END_TYPE

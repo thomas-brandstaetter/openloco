@@ -1,0 +1,14 @@
+(* @see [2] Example 3.8 *)
+
+TYPE
+    LimitedRevol    : UINT (0..230)
+    TypLevel        : (Idling, SpeedUp1, SpeedUp2, MaxPower);
+    MotorState:
+    STRUCT
+        Revolutions :   LimitedRevol;
+        Level       :   TypLevel;
+        MaxReached  :   BOOL;
+        Failure     :   BOOL;
+        Brake       :   BYTE;
+    END_STRUCT;
+END_TYPE

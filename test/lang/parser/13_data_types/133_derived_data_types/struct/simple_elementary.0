@@ -1,0 +1,6 @@
+TYPE
+    struct1 :
+    STRUCT
+        element1 :     UINT;
+    END_STRUCT;
+END_TYPE

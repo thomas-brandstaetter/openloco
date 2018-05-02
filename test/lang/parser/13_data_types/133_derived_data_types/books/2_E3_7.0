@@ -4,7 +4,7 @@ TYPE
     Colour :        (red, yellow, green);           (* enumeration *)
     Sensor :        INT (-56..128);                 (* range *)
     Measure :       ARRAY [1..45] OF Sensor;        (* array *)
-    TestBench :     UINT; Colour:= red;             (* structure *)
+    TestBench :                                     (* structure *)
     STRUCT
         Place :     UINT;                           (* elementary data type *)
         Light :     Colour := red;                  (* enumerated data type with initial value *)

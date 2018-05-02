@@ -1,4 +1,5 @@
 
+
 function(testfile_runner)
     set(oneValueArgs TESTFILE)
 
@@ -13,6 +14,6 @@ function(testfile_runner)
     add_test(
         NAME ${testfile_TESTFILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND ${CMAKE_BINARY_DIR}/bin/testfile_runner ${testfile_TESTFILE}
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/testfile_runner ${testfile_TESTFILE}
     )
 endfunction()

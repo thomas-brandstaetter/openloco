@@ -3,26 +3,36 @@
 # project setup
 # ----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.10)
-project(openloco CXX)
+cmake_minimum_required(VERSION 3.0)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+include(${CMAKE_SOURCE_DIR}/cmake/Modules/unit_test.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/Modules/testfile_runner.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/Modules/coverage_build_type.cmake)
+
+project(openloco C CXX)
 
 # ----------------------------------------------------------------------------
 # Compiler settings
 # ----------------------------------------------------------------------------
 
-add_definitions(
-    -std=c++11
-    -ferror-limit=100
-)
+add_definitions(-std=c++11)
+
+if({CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    add_definitions(-stdlib=libc++)
+endif()
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+message("** COMPILER")
+message("**    Build type:      ${CMAKE_BUILD_TYPE}")
+message("**    Generator:       ${CMAKE_GENERATOR}")
+message("**    C compiler:      ${CMAKE_C_COMPILER_ID}")
+message("**    C++ compiler:    ${CMAKE_CXX_COMPILER_ID}")
 
 # ----------------------------------------------------------------------------
 # Include / Link directories
 # ----------------------------------------------------------------------------
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-include(${CMAKE_SOURCE_DIR}/cmake/Modules/unit_test.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/Modules/testfile_runner.cmake)
 
 if (WIN32)
     SET(CMAKE_PREFIX_PATH "C:/Qt/5.10.1/msvc2017_64")
@@ -42,7 +52,10 @@ include_directories(
 # Find packages
 # ----------------------------------------------------------------------------
 
-message(** LIBRARIES)
+message("** LIBRARIES")
+
+find_package(Threads REQUIRED)
+    message("**    PThreads found: ${THREADS_FOUND}")
 
 find_package(BOOST REQUIRED COMPONENTS variant)
     message("**    Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
@@ -62,7 +75,9 @@ find_package(Qt5Core REQUIRED)
 
 find_package(Qt5Widgets REQUIRED)
     message("**    Qt5Widgets version ${Qt5Widgets_VERSION_STRING}")
+    message("**    Qt5Gui version ${Qt5Gui_VERSION_STRING}")
     include_directories(${Qt5Widgets_INCLUDE_DIRS})
+
 
 if (WIN32)
     # FIXME GTest Windows bug
@@ -71,7 +86,7 @@ if (WIN32)
     set(GTEST_MAIN_LIBRARY "C:\\Program Files (x86)\\googletest-distribution\\gtest_maind.lib")
     set( ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
 else()
-    find_package(GTest REQUIRED)
+    find_package(GTest REQUIRED pthread)
         message("**    GTest found: ${GTEST_FOUND}")
         include_directories(${GTEST_INCLUDE_DIRS})
 
@@ -79,16 +94,12 @@ endif()
 
 
 
-
 # ----------------------------------------------------------------------------
 # CTEST CDASH
 # ----------------------------------------------------------------------------
 
-
 include(CTest)
 enable_testing()
-
-
 
 add_definitions(-g)
 enable_testing()
@@ -98,14 +109,8 @@ enable_testing()
 # dive into the code
 # ----------------------------------------------------------------------------
 
-add_subdirectory(header)
+message("** Configuring begin")
+
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(test)
-
-
-
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()

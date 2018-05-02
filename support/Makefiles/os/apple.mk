@@ -1,7 +1,8 @@
-XCODE_DEBUG_DIR=/build/xcode-debug
+XCODE_DEBUG_DIR=build/xcode-debug
 
 
-xcode: build_dirs
+xcode:
+	mkdir -p $(XCODE_DEBUG_DIR)
 	cd $(XCODE_DEBUG_DIR) && $(SET_CXX) cmake -DCMAKE_BUILD_TYPE=DEBUG  $(SET_CM_CXX) -G "Xcode" ../..
 
 xo:

@@ -19,16 +19,6 @@ namespace ast {
         value_wrapper(VT& rhs) : value(rhs) {}
         value_wrapper(const VT& rhs) : value(rhs) {}
 
-        value_wrapper(value_wrapper &) = default;
-        value_wrapper(const value_wrapper &) = default;
-
-        value_wrapper& operator=(value_wrapper& other) = default;
-        value_wrapper& operator=(const value_wrapper& other)  = default;
-
-        value_wrapper(value_wrapper&& rhs) = default;
-        value_wrapper& operator=(value_wrapper && ) = default;
-
-
         virtual ~value_wrapper() {}
 
         VT value;

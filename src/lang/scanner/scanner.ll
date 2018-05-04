@@ -7,7 +7,6 @@
     #include <ast/ast.h>
     #include <parser.hh>
     #include <location.hh>
-    #include <util/debug.h>
 
     #define YY_USER_ACTION loc.columns(yyleng);
 

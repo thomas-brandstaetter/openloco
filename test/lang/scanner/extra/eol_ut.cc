@@ -29,7 +29,7 @@ TEST_F(eol_scanner_test, disable_scanning_for_EOL) {
     input << "\n";
 
     scanner.reset(input);
-    scanner.unset_scan_eol();
+    scanner.set_scan_eol(false);
     parser::symbol_type result = scanner.yylex(driver);
 
     ASSERT_EQ(parser::token::END, result.token());
@@ -39,7 +39,7 @@ TEST_F(eol_scanner_test, enable_scanning_for_EOL) {
     input << "\n";
 
     scanner.reset(input);
-    scanner.set_scan_eol();
+    scanner.set_scan_eol(true);
     parser::symbol_type result = scanner.yylex(driver);
 
     ASSERT_EQ(parser::token::EOL, result.token());

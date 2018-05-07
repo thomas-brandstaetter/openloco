@@ -56,20 +56,23 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 %{  /* Code executed each time yylex is called */
     loc.step();
+
+    std::cout << "peace" << std::endl;
 %}
 
     /** @see [1] 2.1.5 */
 
-"(*"                        { BEGIN(COMMENT); }
+"(*"                        { BEGIN(COMMENT); std::cerr << "i am here <COMMENT> intro " << std::endl;}
 <COMMENT>"*)"               { BEGIN(INITIAL); }
-<COMMENT>"(*"               { yyerror( "E.1 [2.1.5]: Nested comments", loc ); }
-<COMMENT><<EOF>>            {
-        yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc );
-        BEGIN(INITIAL);
-        unput(EOF);
+<COMMENT>"(*"               {
+        yyerror( "E.1 [2.1.5]: Nested comments", loc );
+        std::cerr << "i am here <COMMENT> before exit " << std::endl;
+        exit(1);
+        std::cerr << "i am there -=---------" << std::endl;
     }
-<COMMENT>\n                 { }
-<COMMENT>.                  { }
+<COMMENT><<EOF>>            { yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc ); exit(1); }
+<COMMENT>\n                 { loc.lines(yyleng); loc.step();}
+<COMMENT>.                  { loc.step(); }
 
 
     /** @see [1] C.2 Keywords */
@@ -318,13 +321,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 
 void
-openloco::lang::scanner::set_scan_eol() {
-    _scan_eol = true;
-}
-
-void
-openloco::lang::scanner::unset_scan_eol() {
-    _scan_eol = false;
+openloco::lang::scanner::set_scan_eol(bool scan_eol) {
+    _scan_eol = scan_eol;
 }
 
 void
@@ -363,3 +361,4 @@ openloco::lang::scanner::reset_location() {
     loc.begin.line = 1;
     loc.end.line = 1;
 }
+

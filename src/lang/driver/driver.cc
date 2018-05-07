@@ -10,15 +10,16 @@
 int
 openloco::lang::driver::parse(std::istream& in, std::ostream& out) {
 
-    openloco::lang::scanner scanner {*this};
-    openloco::lang::parser parser {*this, scanner};
+//    openloco::lang::scanner scanner {std::istream& in};
+//    openloco::lang::parser parser {*this, scanner};
 
-    scanner.yyrestart(in);
-    scanner.set_debug(1);
-    parser.set_debug_level(false);
-    int res = parser.parse();
+//    scanner.yyrestart(in);
+//    scanner.set_debug(1);
+//    parser.set_debug_level(false);
+//    int res = parser.parse();
 
-    return res;
+//    return res;
+    return 0;
 }
 
 int

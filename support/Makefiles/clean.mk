@@ -1,5 +1,5 @@
 
-clean:
+clean-all:
 	rm -rf build/*
 
 clean-win:

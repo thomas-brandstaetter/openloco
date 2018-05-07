@@ -27,14 +27,12 @@ namespace lang {
         virtual ~scanner() {}
         virtual openloco::lang::parser::symbol_type yylex(openloco::lang::driver &driver);
 
-
         /** \addtogroup Scanner control */
         /** @{ */
         void reset(std::istream* input_file);
         void reset(std::istream& input_file);
 
-        void set_scan_eol();            /**< Scanner treats EOL as symbol */
-        void unset_scan_eol();          /**< Scanner treats EOL as whitespace */
+        void set_scan_eol(bool scan_eol);       /**< Scanner treats EOL as symbol or whitespace */
         /** @} */
 
         void yyerror(const char* message, location loc);
@@ -54,6 +52,8 @@ namespace lang {
         /** @{ */
 
         /**
+         * prepare IEC numeric constants for converting from string to numeric type
+         *
          * @example
          *      (2, "2#1101_0010") --> 11010010
          */
@@ -63,6 +63,7 @@ namespace lang {
 
 
         driver &_driver;
+
         bool _scan_eol;
     };
 }}

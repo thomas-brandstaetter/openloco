@@ -13,8 +13,8 @@
 
 
 %glr-parser
-%expect 12
-%expect-rr 16
+%expect 11
+%expect-rr 15
 
 %param {openloco::lang::driver &driver}
 %parse-param {openloco::lang::scanner &scanner}
@@ -230,8 +230,8 @@
 
     // B.1.3 Data types
 
-%type  <ast::elementary_type_name>  data_type_name
-%type  <std::variant< ast::elementary_type_name, std::string>>  non_generic_type_name
+%type  <ast::elementary_type_name>      data_type_name
+%type  <std::variant<ast::elementary_type_name, std::string>>     non_generic_type_name
 
     // B.1.3.1 Elementary data types
 %type  <ast::elementary_type_name>      elementary_type_name
@@ -264,9 +264,9 @@
 
 %type  <ast::single_element_type_declaration> single_element_type_declaration
 
-%type  <ast::simple_type_declaration>                           simple_type_declaration
-%type  <ast::simple_type_declaration::spec_init>                simple_spec_init
-%type  <std::variant< ast::elementary_type_name, std::string>>  simple_specification
+%type  <ast::simple_type_declaration>                   simple_type_declaration
+%type  <ast::simple_type_declaration::spec_init>        simple_spec_init
+%type  <std::variant<ast::elementary_type_name, std::string>>                     simple_specification
 
 %type  <ast::subrange_type_declaration> subrange_type_declaration
 %type  <ast::subrange_type_declaration::spec_init>        subrange_spec_init
@@ -281,7 +281,18 @@
 %type  <ast::enumerated_value>              enumerated_value
 
 %type  <ast::array_type_declaration>        array_type_declaration
+%type  <ast::array_initialization>          array_initialization
+%type  <std::vector<ast::array_initial_elements>>     ai__elements
+%type  <ast::array_specification>           array_specification
+%type  <ast::array_type_declaration::spec_init> array_spec_init
+%type  <ast::array_initial_element>         array_initial_element
+%type  <ast::array_initial_elements>        array_initial_elements
+
+%type  <std::vector<ast::subrange>>         as__subranges
+
 %type  <ast::structure_type_declaration>    structure_type_declaration
+%type  <ast::structure_initialization>      structure_initialization
+%type  <std::string>                        structure_element_name
 
 %type  <ast::sei__value>                    sei__value
 
@@ -306,7 +317,10 @@ file
 library_element_name: IDENTIFIER;
 
 library_element_declaration
-    : data_type_declaration
+    : data_type_declaration {
+        ast::root root = static_cast<ast::root>($1);
+        driver.set_root(root);
+    }
     | function_declaration
     | function_block_declaration
     | program_declaration
@@ -645,25 +659,16 @@ dtd__declarations
     ;
 
 type_declaration
-    : single_element_type_declaration {
-    }
-    | array_type_declaration {
-    }
-    | structure_type_declaration {
-    }
-    | string_type_declaration {
-    }
-    | IDENTIFIER {
-    }
+    : single_element_type_declaration   { $$ = $1; }
+    | array_type_declaration            { $$ = $1; }
+    | structure_type_declaration        { $$ = $1; }
+    | string_type_declaration           { $$ = $1; }
     ;
 
 single_element_type_declaration
-    : simple_type_declaration {
-    }
-    | subrange_type_declaration {
-    }
-    | enumerated_type_declaration {
-    }
+    : simple_type_declaration           { $$ = $1; }
+    | subrange_type_declaration         { $$ = $1; }
+    | enumerated_type_declaration       { $$ = $1; }
     ;
 
 simple_type_declaration
@@ -723,14 +728,16 @@ subrange
     ;
 
 enumerated_type_declaration
-    : IDENTIFIER COLON enumerated_spec_init {
+    : enumerated_type_name COLON enumerated_spec_init {
+        $$.type_name = $1;
+        $$.set_spec_init($3);
     }
     ;
 
 enumerated_spec_init
     : enumerated_specification DEF enumerated_value {
         $$.specification = $1;
-        // TODO: $$.value = $3;
+        $$.value = $3;
     }
     | enumerated_specification {
         $$.specification = $1;
@@ -766,7 +773,9 @@ enumerated_value
     ;
 
 array_type_declaration
-    : IDENTIFIER COLON array_spec_init {
+    : array_type_name COLON array_spec_init {
+        $$.type_name = $1;
+        $$.set_spec_init($3);
     }
     ;
 
@@ -776,18 +785,33 @@ array_spec_init
     ;
 
 array_specification
-    : ARRAY LSQUAREB subrange array_specification__subranges RSQUAREB OF non_generic_type_name
+    : ARRAY LSQUAREB subrange as__subranges RSQUAREB OF non_generic_type_name {
+        $$.type_name = $7;
+        $$.dimension.push_back($3);
+        $$.dimension.insert($$.dimension.end(), $4.begin(), $4.end());
+    }
     ;
 
-array_specification__subranges
-    : array_specification__subranges COMMA subrange
+as__subranges
+    : as__subranges COMMA subrange {
+        $1.push_back($3);
+        std::swap($$, $1);
+    }
     |
     ;
 
-array_initialization: LSQUAREB array_initial_elements ai__elements RSQUAREB;
+array_initialization
+    : LSQUAREB array_initial_elements ai__elements RSQUAREB {
+        $$.elements.push_back($2);
+        $$.elements.insert($$.elements.end(), $3.begin(), $3.end());
+    }
+    ;
 
 ai__elements
-    : ai__elements COMMA array_initial_elements
+    : ai__elements COMMA array_initial_elements {
+        $1.push_back($3);
+        std::swap($$, $1);
+    }
     |
     ;
 
@@ -798,14 +822,14 @@ array_initial_elements
     ;
 
 array_initial_element
-    : constant
-    | enumerated_value
-    | structure_initialization
-    | array_initialization
+    : constant                      { $$.c = $1; }
+    | enumerated_value              { $$.e = $1; }
+    | structure_initialization      { $$.s = &($1); }
+    | array_initialization          { $$.a = &($1); }
     ;
 
 structure_type_declaration
-    : IDENTIFIER COLON structure_specification {
+    : structure_type_name COLON structure_specification {
     }
     ;
 
@@ -840,14 +864,14 @@ sed__spec_init
     | initialized_structure
     ;
 
-structure_element_name: IDENTIFIER;
+structure_element_name: IDENTIFIER  { $$ = $1; };
 
 structure_initialization
-    : LPAR structure_element_initialization structure_element_initialization__list RPAR
+    : LPAR structure_element_initialization si__initializations RPAR
     ;
 
-structure_element_initialization__list
-    : structure_element_initialization__list COMMA structure_element_initialization
+si__initializations
+    : si__initializations COMMA structure_element_initialization
     |
     ;
 
@@ -947,7 +971,7 @@ subscript_list__subscripts
     |
     ;
 
-    // TODO
+
 subscript: IDENTIFIER;
 
 structured_variable: record_variable DOT field_selector;

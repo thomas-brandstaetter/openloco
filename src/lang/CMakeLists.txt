@@ -26,6 +26,7 @@ add_library(
         driver/error.cc
         scanner/scanner.h
         ast/ast.h
+        ${CMAKE_CURRENT_BINARY_DIR}/parser.hh
         ${FLEX_scanner_OUTPUTS}
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}

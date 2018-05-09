@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <ast/ast.h>  // FIXME: path, something is wrong with the cmake search paths
+
 namespace openloco {
 namespace lang {
 
@@ -96,7 +98,22 @@ namespace lang {
         /** @} */
 
         void set_debug(bool value) { _debug = value; }
+
+        /** /addgroup Gathering */
+        /** @{ */
+
+        /**
+         * Build a pushdown automaton while parsing.
+         *
+         * @details Needs invocation in the parser code.
+         *
+         * @param token The token to add.
+         */
         void add_token(std::string token);
+
+        void set_root(ast::root root)   { _ast_root = root; }
+        ast::root& get_root()           { return _ast_root; }
+        /** @} */
 
         friend class parser;
         friend class scanner;
@@ -105,5 +122,7 @@ namespace lang {
 
         std::vector<std::string> _tokens;
         bool _debug;
+
+        ast::root _ast_root;
     };
 }}

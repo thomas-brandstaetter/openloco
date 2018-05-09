@@ -147,6 +147,8 @@ namespace ast {
 
 
 #pragma mark - B.1.3 Data types
+
+
 #pragma mark B.1.3.1 Elementary data types
 
     enum class elementary_type_name {
@@ -209,7 +211,7 @@ namespace ast {
 
 
 #pragma mark B.1.3.2 Generic data types
-    // B.1.3.2 Generic data types
+
     enum class generic_type_name {
          ANY                = 0x40000000
         ,ANY_DERIVED        = 0x10000000    | static_cast<int>(ANY)
@@ -224,6 +226,10 @@ namespace ast {
         ,ANY_DATE           = 0x00800000    | static_cast<int>(ANY_ELEMENTARY)
     };
 
+    typedef
+        std::variant<elementary_type_name, std::string>
+        non_generic_type_name;
+
 #pragma mark B.1.3.3 Derived data types
 
 
@@ -233,6 +239,7 @@ namespace ast {
         constant>
     {
     };
+
 
     // subrange ----------------------
 
@@ -276,14 +283,12 @@ namespace ast {
     struct enumerated_type_declaration : type_declaration_base<
         std::string,
         enumerated_specification,
-        constant>
+        enumerated_value>
     {
     };
 
-    // TODO:
-    typedef
-        std::variant<constant, enumerated_value>
-        sei__value;
+
+    // string ------------------------
 
     struct string_type_declaration
     {
@@ -292,7 +297,9 @@ namespace ast {
         std::string value;
     };
 
-    // -----------------------------------------
+
+
+    // -------------------------------
     typedef
         std::variant<
             simple_type_declaration,
@@ -300,12 +307,89 @@ namespace ast {
             enumerated_type_declaration>
         single_element_type_declaration;
 
-    struct array_type_declaration
+    typedef
+        std::variant<constant, enumerated_value>
+        sei__value;
+
+    // array -------------------------
+
+    struct array_specification {
+        non_generic_type_name type_name;
+        std::vector<subrange> dimension;
+    };
+
+    struct structure_initialization;
+    struct array_initialization;
+
+    struct array_initial_element {
+        constant c;
+        enumerated_value e;
+        structure_initialization * s;
+        array_initialization * a;
+    };
+
+
+    struct array_initial_elements {
+        long size;
+        array_initial_element element;
+    };
+
+
+    struct array_initialization
+    {
+        std::vector<array_initial_elements> elements;
+    };
+
+    struct array_type_declaration : type_declaration_base<
+            std::string,
+            array_specification,
+            array_initialization>
+    {
+    };
+
+    // structure ---------------------
+
+    struct structure_initialization
+    {
+
+    };
+
+    struct structure_element_declaration
+    {
+        std::string element_name;
+
+        // TODO: fix initialized_structure dependency problem
+        typedef
+            std::variant<
+                    simple_type_declaration::spec_init,
+                    subrange_type_declaration::spec_init,
+                    enumerated_type_declaration::spec_init,
+                    array_type_declaration::spec_init
+            >
+            spec_init;
+
+        spec_init specification_init;
+    };
+
+    struct structure_declaration
+    {
+        std::vector<structure_element_declaration> elements;
+    };
+
+    struct initialized_structure
+    {
+        std::string type_name;
+        structure_initialization initialization;
+    };
+
+    struct structure_specification : std::variant<structure_declaration, initialized_structure>
     {
     };
 
     struct structure_type_declaration
     {
+        std::string type_name;
+        structure_specification specification;
     };
 
     typedef
@@ -316,9 +400,22 @@ namespace ast {
             string_type_declaration>
         type_declaration;
 
-
-    struct data_type_declaration {
+    
+    // -------------------------------
+    struct data_type_declaration
+    {
         std::vector<type_declaration> declarations;
     };
 
+    /**
+     * The name is program. This typedef is used as long as the grammar is not
+     * completed and will change over time.
+     */
+    typedef
+        std::vector<ast::type_declaration>
+        temporary_root;
+
+    typedef
+        temporary_root
+        root;
 }}}

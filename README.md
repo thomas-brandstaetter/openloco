@@ -7,11 +7,10 @@ openloco is an open source implementation of IEC 61131-3 languages, STL, IL, FBD
 
 Goals:
 
-* Mulpiplatform:  Linux, Unix, macOS, Winodws
+* Multiplatform:  Linux, Unix, macOS, Windows
 * Implement the full Standard (based on IEC:2003)
-* convert all languages within the standard 
-    * postscipt output of programs
-* Build into LLVM IR to support as many target plattform as possible
+* Postscript output of graphic languages
+* Compiles into LLVM IR to support as many target plattform as possible
 * Bindings for popular languages
 * Virutal PLC
     * Virtual Raspberry Pi
@@ -33,6 +32,8 @@ Tools used in this project
 * C++ 17
 * python
 * cmake
-* ragel
+* bison/flex
+* postscript
+* LLVM
 
 Take a look at the develop branch for recent features

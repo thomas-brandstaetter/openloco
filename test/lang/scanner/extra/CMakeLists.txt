@@ -22,7 +22,7 @@ unit_test(
 
 
 unit_test(
-    TARGET  syntax_error
+    TARGET  syntax_error_ut
     SOURCES syntax_error_ut.cc
     LIBRARIES parser
     LINK_FLEX

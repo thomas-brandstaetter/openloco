@@ -964,10 +964,10 @@ array_variable: subscripted_variable subscript_list;
 
 subscripted_variable: symbolic_variable;
 
-subscript_list: LSQUAREB subscript subscript_list__subscripts RSQUAREB;
+subscript_list: LSQUAREB subscript sl__subscripts RSQUAREB;
 
-subscript_list__subscripts
-    : subscript_list__subscripts "," subscript
+sl__subscripts
+    : sl__subscripts "," subscript
     |
     ;
 

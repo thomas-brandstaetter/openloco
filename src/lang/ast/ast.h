@@ -129,20 +129,18 @@ namespace ast {
         daytime time;
     };
 
-    typedef
-        std::variant<duration, time_of_day, date_literal, date_and_time>
-        time_literal ;
+    using time_literal =
+        std::variant<duration, time_of_day, date_literal, date_and_time>;
 
 
 
-    typedef
+    using constant =
         std::variant<
             numeric_literal,
             std::string,
             time_literal,
             long,
-            ast::value_wrapper<bool> >
-        constant;
+            ast::value_wrapper<bool> >;
 
 
 
@@ -226,9 +224,7 @@ namespace ast {
         ,ANY_DATE           = 0x00800000    | static_cast<int>(ANY_ELEMENTARY)
     };
 
-    typedef
-        std::variant<elementary_type_name, std::string>
-        non_generic_type_name;
+    using non_generic_type_name = std::variant<elementary_type_name, std::string>;
 
 #pragma mark B.1.3.3 Derived data types
 
@@ -255,9 +251,7 @@ namespace ast {
         subrange value;
     };
 
-    typedef
-        std::variant<std::string, ss_specification>
-        subrange_specification;
+    using subrange_specification = std::variant<std::string, ss_specification>;
 
     struct subrange_type_declaration : type_declaration_base<
         std::string,
@@ -321,19 +315,22 @@ namespace ast {
     struct structure_initialization;
     struct array_initialization;
 
-    struct array_initial_element {
-        constant c;
-        enumerated_value e;
-        structure_initialization * s;
-        array_initialization * a;
-    };
+    /**
+     * @details The vectors will never hold more than one element. It's use is to forward declare types.
+     * @todo check the invariant of only one element (better at compiler time).
+     */
+    using array_initial_element =
+        std::variant<
+            constant,
+            enumerated_value,
+            std::vector<structure_initialization>,
+            std::vector<array_initialization>;
 
 
     struct array_initial_elements {
         long size;
         array_initial_element element;
     };
-
 
     struct array_initialization
     {
@@ -349,24 +346,39 @@ namespace ast {
 
     // structure ---------------------
 
+    struct structure_element_initialization
+    {
+        using element_initialization = std::variant<constant, enumerated_value, array_initialization>;
+
+        element_initialization initialization;
+        std::string element_name;
+    };
+
     struct structure_initialization
     {
+        using structure_element_initialization_list = std::vector<structure_element_initialization>;
 
+        structure_element_initialization_list element_initializations;
+        std::string element_name;
+    };
+
+    struct initialized_structure
+    {
+        std::string type_name;
+        structure_initialization initialization;
     };
 
     struct structure_element_declaration
     {
         std::string element_name;
 
-        // TODO: fix initialized_structure dependency problem
-        typedef
+        using spec_init =
             std::variant<
-                    simple_type_declaration::spec_init,
-                    subrange_type_declaration::spec_init,
-                    enumerated_type_declaration::spec_init,
-                    array_type_declaration::spec_init
-            >
-            spec_init;
+                simple_type_declaration::spec_init,
+                subrange_type_declaration::spec_init,
+                enumerated_type_declaration::spec_init,
+                array_type_declaration::spec_init,
+                initialized_structure>;
 
         spec_init specification_init;
     };
@@ -376,15 +388,7 @@ namespace ast {
         std::vector<structure_element_declaration> elements;
     };
 
-    struct initialized_structure
-    {
-        std::string type_name;
-        structure_initialization initialization;
-    };
-
-    struct structure_specification : std::variant<structure_declaration, initialized_structure>
-    {
-    };
+    using structure_specification = std::variant<structure_declaration, initialized_structure>;
 
     struct structure_type_declaration
     {
@@ -392,13 +396,12 @@ namespace ast {
         structure_specification specification;
     };
 
-    typedef
+    using type_declaration =
         std::variant<
             single_element_type_declaration,
             array_type_declaration,
             structure_type_declaration,
-            string_type_declaration>
-        type_declaration;
+            string_type_declaration>;
 
     
     // -------------------------------
@@ -411,11 +414,8 @@ namespace ast {
      * The name is program. This typedef is used as long as the grammar is not
      * completed and will change over time.
      */
-    typedef
-        std::vector<ast::type_declaration>
-        temporary_root;
+    using temporary_root = std::vector<type_declaration>;
 
-    typedef
-        temporary_root
-        root;
+    using root = temporary_root;
+
 }}}

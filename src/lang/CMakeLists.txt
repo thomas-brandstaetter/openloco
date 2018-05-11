@@ -31,4 +31,4 @@ add_library(
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}
         ${parser_HEADERS}
-)
+        ast/forward_ast.h)

@@ -824,16 +824,8 @@ array_initial_elements
 array_initial_element
     : constant                      { $$ = $1; }
     | enumerated_value              { $$ = $1; }
-    | structure_initialization      {
-        std::vector<ast::structure_initialization> vsi;
-        vsi.push_back($1);
-        $$ = vsi;
-    }
-    | array_initialization          {
-        std::vector<ast::array_initialization> vai;
-        vai.push_back($1);
-        $$ = vai;
-    }
+    | structure_initialization      { $$ = $1; }
+    | array_initialization          { $$ = $1; }
     ;
 
 structure_type_declaration
@@ -890,11 +882,7 @@ sei__value
     : constant                      { $$ = $1; }
     | enumerated_value              { $$ = $1; }
     | array_initialization          { $$ = $1; }
-    | structure_initialization      {
-        std::vector<ast::structure_initialization> vsi;
-        vsi.push_back($1);
-        $$ = vsi;
-    }
+    | structure_initialization      { $$ = $1; }
     ;
 
 string_type_declaration

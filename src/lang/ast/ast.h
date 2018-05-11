@@ -9,6 +9,8 @@
 #include <variant>
 #include <vector>
 
+#include "forward_ast.h"
+
 namespace openloco {
 namespace lang {
 namespace ast {
@@ -317,8 +319,8 @@ namespace ast {
         std::variant<
             constant,
             enumerated_value,
-            std::vector<structure_initialization>,
-            std::vector<array_initialization>>;
+            forward_ast<structure_initialization>,
+            forward_ast<array_initialization>>;
 
 
     struct array_initial_elements {
@@ -351,7 +353,7 @@ namespace ast {
                 constant,
                 enumerated_value,
                 array_initialization,
-                std::vector<structure_initialization>>;
+                forward_ast<structure_initialization>>;
 
         element_initialization initialization;
         std::string element_name;

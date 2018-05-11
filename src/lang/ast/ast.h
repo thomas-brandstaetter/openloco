@@ -311,10 +311,6 @@ namespace ast {
     struct structure_initialization;
     struct array_initialization;
 
-    /**
-     * @details The vectors will never hold more than one element. It's use is to forward declare types.
-     * @todo check the invariant of only one element (better at compiler time).
-     */
     using array_initial_element =
         std::variant<
             constant,
@@ -344,10 +340,6 @@ namespace ast {
 
     struct structure_element_initialization
     {
-        /**
-         * @details std::vector<structure_initialization> will never hold more than one element.
-         *      It is used to forward declare a type
-         */
         using element_initialization =
             std::variant<
                 constant,
@@ -401,13 +393,18 @@ namespace ast {
         structure_specification specification;
     };
 
-    using type_declaration =
-        std::variant<
-            single_element_type_declaration,
-            array_type_declaration,
-            structure_type_declaration,
-            string_type_declaration>;
+    struct type_declaration
+    {
+        using declaration =
+            std::variant<
+                single_element_type_declaration,
+                array_type_declaration,
+                structure_type_declaration,
+                string_type_declaration>;
 
+        declaration decl;
+        std::string type_name;
+    };
     
     // -------------------------------
     struct data_type_declaration

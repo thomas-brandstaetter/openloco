@@ -7,14 +7,15 @@
 %define api.value.type variant
 %define api.token.constructor
 %define parse.assert true
+%define parse.trace
 //%define parse.error verbose
-//%debug
+%debug
 %locations
 
 
 %glr-parser
 %expect 11
-%expect-rr 15
+%expect-rr 14
 
 %param {openloco::lang::driver &driver}
 %parse-param {openloco::lang::scanner &scanner}
@@ -30,11 +31,11 @@
     }}
 
     #define YY_NULLPTR nullptr
-    //#define YYERROR_VERBOSE 1
+    #define YYERROR_VERBOSE 1
 }
 
 %{
-    //#define YYDEBUG 1
+    #define YYDEBUG 1
 
     #include <cmath>
     #include <cassert>
@@ -261,6 +262,7 @@
 %type  <std::vector<ast::type_declaration>>     data_type_declaration
 %type  <std::vector<ast::type_declaration>>     dtd__declarations
 %type  <ast::type_declaration>      type_declaration
+%type  <ast::type_declaration::declaration>  t__declaration
 
 %type  <ast::single_element_type_declaration> single_element_type_declaration
 
@@ -659,6 +661,13 @@ dtd__declarations
     ;
 
 type_declaration
+    : simple_type_name COLON t__declaration {
+        $$.type_name = $1;
+        $$.decl = $3;
+    }
+
+
+t__declaration
     : single_element_type_declaration   { $$ = $1; }
     | array_type_declaration            { $$ = $1; }
     | structure_type_declaration        { $$ = $1; }
@@ -672,9 +681,8 @@ single_element_type_declaration
     ;
 
 simple_type_declaration
-    : simple_type_name COLON simple_spec_init {
-        $$.type_name = $1;
-        $$.set_spec_init($3);
+    : simple_spec_init {
+        $$.set_spec_init($1);
     }
     ;
 
@@ -694,9 +702,8 @@ simple_specification
    ;
 
 subrange_type_declaration
-    : subrange_type_name COLON subrange_spec_init {
-        $$.type_name = $1;
-        $$.set_spec_init($3);
+    : subrange_spec_init {
+        $$.set_spec_init($1);
     }
     ;
 
@@ -728,9 +735,8 @@ subrange
     ;
 
 enumerated_type_declaration
-    : enumerated_type_name COLON enumerated_spec_init {
-        $$.type_name = $1;
-        $$.set_spec_init($3);
+    : enumerated_spec_init {
+        $$.set_spec_init($1);
     }
     ;
 
@@ -773,9 +779,8 @@ enumerated_value
     ;
 
 array_type_declaration
-    : array_type_name COLON array_spec_init {
-        $$.type_name = $1;
-        $$.set_spec_init($3);
+    : array_spec_init {
+        $$.set_spec_init($1);
     }
     ;
 
@@ -829,7 +834,7 @@ array_initial_element
     ;
 
 structure_type_declaration
-    : structure_type_name COLON structure_specification {
+    : structure_specification {
     }
     ;
 
@@ -886,15 +891,15 @@ sei__value
     ;
 
 string_type_declaration
-    : string_type_name COLON STRING std__size std__init {
+    : STRING std__size std__init {
         $$.type_name = ast::elementary_type_name::STRING;
-        $$.size = $4;
-        $$.value = $5;
+        $$.size = $2;
+        $$.value = $3;
     }
-    | string_type_name COLON WSTRING std__size std__init {
+    | WSTRING std__size std__init {
         $$.type_name = ast::elementary_type_name::WSTRING;
-        $$.size = $4;
-        $$.value = $5;
+        $$.size = $2;
+        $$.value = $3;
     }
     ;
 

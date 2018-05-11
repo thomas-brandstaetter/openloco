@@ -661,7 +661,7 @@ dtd__declarations
     ;
 
 type_declaration
-    : simple_type_name COLON t__declaration {
+    : IDENTIFIER COLON t__declaration {
         $$.type_name = $1;
         $$.decl = $3;
     }
@@ -728,10 +728,10 @@ subrange_specification
     ;
 
 subrange
-    : signed_integer DDOT signed_integer {
-        $$.min = $1;
-        $$.max = $3;
-    }
+    : signed_integer DDOT signed_integer { $$.min = $1; $$.max = $3; }
+    | INTEGER DDOT signed_integer { $$.min = $1; $$.max = $3; }
+    | signed_integer DDOT INTEGER { $$.min = $1; $$.max = $3; }
+    | INTEGER DDOT INTEGER { $$.min = $1; $$.max = $3; }
     ;
 
 enumerated_type_declaration

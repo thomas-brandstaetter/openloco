@@ -294,7 +294,7 @@
 %type  <ast::structure_initialization>      structure_initialization
 %type  <std::string>                        structure_element_name
 
-%type  <ast::sei__value>                    sei__value
+%type  <ast::structure_element_initialization::element_initialization>    sei__value
 
 %type  <ast::string_type_declaration>       string_type_declaration
 %type  <long>                               std__size
@@ -822,10 +822,18 @@ array_initial_elements
     ;
 
 array_initial_element
-    : constant                      { $$.c = $1; }
-    | enumerated_value              { $$.e = $1; }
-    | structure_initialization      { $$.s = &($1); }
-    | array_initialization          { $$.a = &($1); }
+    : constant                      { $$ = $1; }
+    | enumerated_value              { $$ = $1; }
+    | structure_initialization      {
+        std::vector<ast::structure_initialization> vsi;
+        vsi.push_back($1);
+        $$ = vsi;
+    }
+    | array_initialization          {
+        std::vector<ast::array_initialization> vai;
+        vai.push_back($1);
+        $$ = vai;
+    }
     ;
 
 structure_type_declaration
@@ -881,8 +889,12 @@ structure_element_initialization
 sei__value
     : constant                      { $$ = $1; }
     | enumerated_value              { $$ = $1; }
-    | array_initialization
-    | structure_initialization
+    | array_initialization          { $$ = $1; }
+    | structure_initialization      {
+        std::vector<ast::structure_initialization> vsi;
+        vsi.push_back($1);
+        $$ = vsi;
+    }
     ;
 
 string_type_declaration

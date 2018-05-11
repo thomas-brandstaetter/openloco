@@ -268,11 +268,10 @@ namespace ast {
         std::string value;
     };
 
-    typedef
+    using enumerated_specification = 
         std::variant<
             std::vector<enumerated_value>,
-            std::string>
-        enumerated_specification;
+            std::string>;
 
     struct enumerated_type_declaration : type_declaration_base<
         std::string,
@@ -294,16 +293,11 @@ namespace ast {
 
 
     // -------------------------------
-    typedef
+    using single_element_type_declaration = 
         std::variant<
             simple_type_declaration,
             subrange_type_declaration,
-            enumerated_type_declaration>
-        single_element_type_declaration;
-
-    typedef
-        std::variant<constant, enumerated_value>
-        sei__value;
+            enumerated_type_declaration>;
 
     // array -------------------------
 
@@ -324,7 +318,7 @@ namespace ast {
             constant,
             enumerated_value,
             std::vector<structure_initialization>,
-            std::vector<array_initialization>;
+            std::vector<array_initialization>>;
 
 
     struct array_initial_elements {
@@ -348,7 +342,16 @@ namespace ast {
 
     struct structure_element_initialization
     {
-        using element_initialization = std::variant<constant, enumerated_value, array_initialization>;
+        /**
+         * @details std::vector<structure_initialization> will never hold more than one element.
+         *      It is used to forward declare a type
+         */
+        using element_initialization =
+            std::variant<
+                constant,
+                enumerated_value,
+                array_initialization,
+                std::vector<structure_initialization>>;
 
         element_initialization initialization;
         std::string element_name;

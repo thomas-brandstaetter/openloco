@@ -1,7 +1,7 @@
 (* @see [2] Example 3.8 *)
 
 TYPE
-    LimitedRevol    : UINT (0..230)
+    LimitedRevol    : UINT (0..230);
     TypLevel        : (Idling, SpeedUp1, SpeedUp2, MaxPower);
     MotorState:
     STRUCT

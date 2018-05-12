@@ -1,5 +1,5 @@
 (** @see [3] 3.4.3 *)
 
 TYPE
-    MOTOR SPEED UINT (600 .. 1000);
-END TYPE
+    MOTOR_SPEED : UINT (600 .. 1000);
+END_TYPE

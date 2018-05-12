@@ -8,35 +8,44 @@
 #include <driver/driver.h>
 
 
-int
-openloco::lang::driver::parse(std::istream& in, std::ostream& out) {
+namespace openloco {
+namespace lang {
 
-    openloco::lang::scanner scanner {*this, in};
-    openloco::lang::parser parser {*this, scanner};
 
-    scanner.yyrestart(in);
-    scanner.set_debug(1);
-    int res = parser.parse();
+    int
+    driver::parse(std::istream &in, std::ostream &out)
+    {
 
-    return res;
-}
+        scanner scanner{*this, in};
+        parser parser{*this, scanner};
 
-int
-openloco::lang::driver::parse(std::stringstream &input) {
-    return parse(input, std::cout);
-}
+        scanner.yyrestart(in);
+        scanner.set_debug(1);
+        parser.set_debug_level(1);
+        parser.set_debug_stream(std::cerr);
+        int res = parser.parse();
 
-int
-openloco::lang::driver::parse(std::ifstream &input) {
-    return parse(input, std::cout);
-}
+        return res;
+    }
 
-int
-openloco::lang::driver::parse() {
-    return parse(std::cin, std::cout);
-}
+    int
+    driver::parse(file& infile, std::ostream &out)
+    {
+        openloco::lang::file_streambuffer fsb { infile };
+        std::istream is { &fsb };
 
-void
-openloco::lang::driver::add_token(std::string token) {
-    _tokens.push_back(token);
-}
+        _current_file = &infile;
+        int res = parse(is, out);
+        _current_file = nullptr;
+
+        return res;
+    }
+
+
+    void
+    driver::add_token(std::string token)
+    {
+        _tokens.push_back(token);
+    }
+
+}}

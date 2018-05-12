@@ -7,13 +7,18 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+
+#include <location.hh>
+
+#include "file.h"
 
 namespace openloco {
-namespace lang
-{
+namespace lang {
 
     class error
     {
+    public:
         typedef enum struct error_type_
         {
              E_undefined = 0
@@ -66,23 +71,30 @@ namespace lang
         /**
          * Holds error messages according to error_type
          */
-        static std::vector<std::string> error_messages;
+        static const std::vector<std::string> error_messages;
 
-        /**
-         * Holds error subclass information according to error_type
-         */
-        static std::vector<std::string> error_subclauses;
+        static const std::vector<std::string> error_subclauses;
 
     public:
-        static error error_with_type(error_type type);
-        static error custom_error(std::string message);
+        static error make_error(error_type type, class file& file, location loc);
+        static error make_custom_error(std::string message, class file& file, location loc);
 
+    public:
+        void print(std::ostream& is = std::cerr);
 
     private:
+
+        error(file& file, location loc) : _file(file), _loc(loc)
+        {
+        }
 
         error_type _type;
         std::string _subclass;
         std::string _message;
+        class file& _file;
+        location _loc;
+
+
     };
 
 }}

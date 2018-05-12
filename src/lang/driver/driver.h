@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
-#include <ast/ast.h>  // FIXME: path, something is wrong with the cmake search paths
+#include <ast/ast.h>
+
+#include <driver/file.h>
 
 namespace openloco {
 namespace lang {
@@ -79,7 +81,8 @@ namespace lang {
         driver() :
             dc(),
             _tokens(),
-            _debug(false)
+            _debug(false),
+            _current_file(nullptr)
         {
         }
         /** @} */
@@ -90,11 +93,10 @@ namespace lang {
 
         /** \addtogroup Parsing */
         /** @{ */
-        int parse(std::istream& in, std::ostream& out);
-        int parse(std::stringstream &input);
-        int parse(std::ifstream &input);
-        int parse(FILE *file);
-        int parse();
+
+        int parse(std::istream& in, std::ostream& out = std::cout);
+        int parse(file& infile, std::ostream& out = std::cout);
+
         /** @} */
 
         void set_debug(bool value) { _debug = value; }
@@ -121,6 +123,7 @@ namespace lang {
     private:
 
         std::vector<std::string> _tokens;
+        file* _current_file;
         bool _debug;
 
         ast::root _ast_root;

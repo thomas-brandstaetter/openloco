@@ -3,8 +3,11 @@
     #include <algorithm>
 
     #include <driver/driver.h>
+    #include <driver/error.h>
     #include <scanner/scanner.h>
     #include <ast/ast.h>
+
+
     #include <parser.hh>
     #include <location.hh>
 
@@ -56,21 +59,57 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 %{  /* Code executed each time yylex is called */
     loc.step();
-
-    std::cout << "peace" << std::endl;
 %}
 
     /** @see [1] 2.1.5 */
 
-"(*"                        { BEGIN(COMMENT); std::cerr << "i am here <COMMENT> intro " << std::endl;}
+"(*"                        { BEGIN(COMMENT); }
 <COMMENT>"*)"               { BEGIN(INITIAL); }
 <COMMENT>"(*"               {
-        yyerror( "E.1 [2.1.5]: Nested comments", loc );
-        std::cerr << "i am here <COMMENT> before exit " << std::endl;
-        exit(1);
-        std::cerr << "i am there -=---------" << std::endl;
+
+        // since the EOL of the current line is not reached add it here
+        // FIXME: yytext is not the whole line
+        file& cur_file = *(driver._current_file);
+        cur_file._lines.push_back(yytext);
+
+        openloco::lang::error err = openloco::lang::error::make_error(
+            openloco::lang::error::error_type::E_nested_comments,
+            *(driver._current_file),
+            loc);
+        err.print();
+
+        return parser::make_SCANNER_ERROR(loc);
+
+        //yyerror( "E.1 [2.1.5]: Nested comments", loc );
     }
-<COMMENT><<EOF>>            { yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc ); exit(1); }
+<COMMENT><<EOF>>            {
+
+        // since the EOL of the current line is not reached add it here
+        // FIXME: yytext is not the whole line
+        file& cur_file = *(driver._current_file);
+
+        if (cur_file._lines.size() == 0)
+            cur_file._lines.push_back(yytext);
+
+        // correct line due to EOF after error which flex interprets as newline
+        unsigned int correct_line = loc.begin.line - 1;
+        file &file = *(driver._current_file);
+        std::string error_line = file.get_line(correct_line);
+        unsigned int correct_column = error_line.length();
+
+        position correct_begin { nullptr, correct_line, correct_column};
+        position correct_end { nullptr, correct_line, correct_column};
+        location correct_location { correct_begin, correct_end };
+
+
+        openloco::lang::error err = openloco::lang::error::make_error(
+            openloco::lang::error::error_type::E_nested_comments,
+            cur_file,
+            correct_location);
+        err.print();
+        // yyerror( "E.1 [?.?.?]: EOF before comment is closed", loc );
+        BEGIN(INITIAL);
+    }
 <COMMENT>\n                 { loc.lines(yyleng); loc.step();}
 <COMMENT>.                  { loc.step(); }
 
@@ -315,7 +354,11 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 <<EOF>>                 { return openloco::lang::parser::make_END(loc); }
 
-.                       { return openloco::lang::parser::make_SCANNER_ERROR(loc); }
+.                       {
+        char c = yytext[0];
+        std::cout << "unrecognized character#: '" << static_cast<int>(c) << "'" << std::endl;
+        return openloco::lang::parser::make_SCANNER_ERROR(loc);
+    }
 
 %%
 

@@ -7,7 +7,7 @@ BISON_TARGET(
         ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.yy
         ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
         VERBOSE
-        COMPILE_FLAGS "--language=C++"
+        COMPILE_FLAGS "--language=C++ --verbose"
 )
 
 FLEX_TARGET(
@@ -31,4 +31,4 @@ add_library(
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}
         ${parser_HEADERS}
-        ast/forward_ast.h)
+        ast/forward_ast.h driver/file.cc driver/file.h)

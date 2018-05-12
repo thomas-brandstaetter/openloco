@@ -4,6 +4,7 @@
  */
 
 #include <src/lang/driver/driver.h>
+#include <src/lang/driver/file.h>
 
 #include <cassert>
 #include <fstream>
@@ -39,7 +40,10 @@ main(int argc, char** argv)
         std::cerr << "File not found: " << filename;
         exit(3);
     }
-    result = driver.parse(file);
+
+    openloco::lang::file f;
+    f.open(file);
+    result = driver.parse(f);
 
     return (result == desired_result) ? 0 : 1;
 }

@@ -244,6 +244,8 @@ namespace ast {
     struct subrange {
         long min;       // TODO: IEC type instead of C++ ones
         long max;
+
+        using list = std::vector<subrange>;
     };
 
 
@@ -326,7 +328,8 @@ namespace ast {
 
     struct array_initialization
     {
-        std::vector<array_initial_elements> elements;
+        using list = std::vector<array_initial_elements>;
+        list elements;
     };
 
     struct array_type_declaration : type_declaration_base<
@@ -340,23 +343,23 @@ namespace ast {
 
     struct structure_element_initialization
     {
-        using element_initialization =
+        using value =
             std::variant<
                 constant,
                 enumerated_value,
                 array_initialization,
                 forward_ast<structure_initialization>>;
 
-        element_initialization initialization;
-        std::string element_name;
+        value init_value;
+        std::string name;
     };
 
     struct structure_initialization
     {
-        using structure_element_initialization_list = std::vector<structure_element_initialization>;
+        using list = std::vector<structure_element_initialization>;
+        using iterator = list::iterator;
 
-        structure_element_initialization_list element_initializations;
-        std::string element_name;
+        list element_initializations;
     };
 
     struct initialized_structure
@@ -382,7 +385,9 @@ namespace ast {
 
     struct structure_declaration
     {
-        std::vector<structure_element_declaration> elements;
+        using list = std::vector<structure_element_declaration>;
+        using iterator = list::iterator;
+        list declarations;
     };
 
     using structure_specification = std::variant<structure_declaration, initialized_structure>;

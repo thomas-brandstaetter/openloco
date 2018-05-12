@@ -268,13 +268,13 @@
 
 %type  <ast::simple_type_declaration>                   simple_type_declaration
 %type  <ast::simple_type_declaration::spec_init>        simple_spec_init
-%type  <std::variant<ast::elementary_type_name, std::string>>                     simple_specification
+%type  <std::variant<ast::elementary_type_name, std::string>>  simple_specification
 
 %type  <ast::subrange_type_declaration> subrange_type_declaration
 %type  <ast::subrange_type_declaration::spec_init>        subrange_spec_init
 %type  <ast::subrange_specification>    subrange_specification
 %type  <ast::subrange>                  subrange
-
+%type  <ast::subrange::list>            as__subranges
 
 %type  <ast::enumerated_type_declaration>   enumerated_type_declaration
 %type  <ast::enumerated_type_declaration::spec_init>        enumerated_spec_init
@@ -284,19 +284,25 @@
 
 %type  <ast::array_type_declaration>        array_type_declaration
 %type  <ast::array_initialization>          array_initialization
-%type  <std::vector<ast::array_initial_elements>>     ai__elements
+%type  <ast::array_initialization::list>    ai__elements
 %type  <ast::array_specification>           array_specification
 %type  <ast::array_type_declaration::spec_init> array_spec_init
 %type  <ast::array_initial_element>         array_initial_element
 %type  <ast::array_initial_elements>        array_initial_elements
 
-%type  <std::vector<ast::subrange>>         as__subranges
+%type  <ast::structure_element_declaration> structure_element_declaration
+%type  <ast::structure_element_initialization> structure_element_initialization
+%type  <ast::structure_element_declaration::spec_init> sed__spec_init
+%type  <ast::structure_element_initialization::value> sei__value
 
 %type  <ast::structure_type_declaration>    structure_type_declaration
 %type  <ast::structure_initialization>      structure_initialization
-%type  <std::string>                        structure_element_name
+%type  <ast::structure_initialization::list> si__initializations
+%type  <ast::initialized_structure>         initialized_structure
+%type  <ast::structure_declaration>         structure_declaration
+%type  <ast::structure_declaration::list>   sd__declarations
 
-%type  <ast::structure_element_initialization::element_initialization>    sei__value
+%type  <std::string>                        structure_element_name
 
 %type  <ast::string_type_declaration>       string_type_declaration
 %type  <long>                               std__size
@@ -728,10 +734,10 @@ subrange_specification
     ;
 
 subrange
-    : signed_integer DDOT signed_integer { $$.min = $1; $$.max = $3; }
-    | INTEGER DDOT signed_integer { $$.min = $1; $$.max = $3; }
-    | signed_integer DDOT INTEGER { $$.min = $1; $$.max = $3; }
-    | INTEGER DDOT INTEGER { $$.min = $1; $$.max = $3; }
+    : signed_integer DDOT signed_integer    { $$.min = $1; $$.max = $3; }
+    | INTEGER DDOT signed_integer           { $$.min = $1; $$.max = $3; }
+    | signed_integer DDOT INTEGER           { $$.min = $1; $$.max = $3; }
+    | INTEGER DDOT INTEGER                  { $$.min = $1; $$.max = $3; }
     ;
 
 enumerated_type_declaration
@@ -848,40 +854,60 @@ initialized_structure
     ;
 
 structure_declaration:
-    STRUCT sed__declarations END_STRUCT {
+    STRUCT sd__declarations END_STRUCT {
+        $$.declarations = $2;
     }
     ;
 
-sed__declarations
-    : sed__declarations structure_element_declaration SEMICOLON
-    | structure_element_declaration SEMICOLON
+sd__declarations
+    : sd__declarations structure_element_declaration SEMICOLON {
+        $1.push_back($2);
+        std::swap($$, $1);
+    }
+    | structure_element_declaration SEMICOLON {
+        $$.push_back($1);
+    }
     ;
 
 structure_element_declaration
-    : IDENTIFIER COLON sed__spec_init
+    : IDENTIFIER COLON sed__spec_init {
+        $$.element_name = $1;
+        $$.specification_init = $3;
+    }
     ;
 
 sed__spec_init
-    : simple_spec_init
-    | subrange_spec_init
-    | enumerated_spec_init
-    | array_spec_init
-    | initialized_structure
+    : simple_spec_init              { $$ = $1; }
+    | subrange_spec_init            { $$ = $1; }
+    | enumerated_spec_init          { $$ = $1; }
+    | array_spec_init               { $$ = $1; }
+    | initialized_structure         { $$ = $1; }
     ;
 
 structure_element_name: IDENTIFIER  { $$ = $1; };
 
 structure_initialization
-    : LPAR structure_element_initialization si__initializations RPAR
+    : LPAR si__initializations RPAR {
+        $$.element_initializations = $2;
+    }
     ;
 
 si__initializations
-    : si__initializations COMMA structure_element_initialization
-    |
+    : si__initializations COMMA structure_element_initialization {
+        $1.push_back($3);
+        std::swap($$, $1);
+    }
+    | structure_element_initialization {
+        $$.push_back($1);
+    }
     ;
 
 structure_element_initialization
-    : structure_element_name DEF sei__value;
+    : structure_element_name DEF sei__value {
+        $$.name = $1;
+        $$.init_value = $3;
+    }
+    ;
 
 sei__value
     : constant                      { $$ = $1; }
@@ -1787,8 +1813,6 @@ openloco::lang::parser::error(const location_type &loc, const std::string& messa
         << loc
         << ": " << message << std::endl;
     std::cerr << std::flush;
-
-    exit(1);
 }
 
 

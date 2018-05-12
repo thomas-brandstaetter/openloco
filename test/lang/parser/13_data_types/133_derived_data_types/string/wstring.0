@@ -1,0 +1,3 @@
+TYPE
+    Text : WSTRING;
+END_TYPE

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <vector>
 
-#include <src/lang/driver/error.h>
+#include <driver/error.h>
 
 
 namespace openloco {

@@ -93,8 +93,6 @@ namespace lang {
         std::string _message;
         class file& _file;
         location _loc;
-
-
     };
 
 }}

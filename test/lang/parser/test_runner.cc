@@ -3,8 +3,8 @@
  * @date 15.04.18.
  */
 
-#include <src/lang/driver/driver.h>
-#include <src/lang/driver/file.h>
+#include <driver/driver.h>
+#include <driver/file.h>
 
 #include <cassert>
 #include <fstream>
@@ -51,7 +51,7 @@ main(int argc, char** argv)
 void
 synopsis() {
     std::cerr
-        << "Synopsis\n"
+        << "SYNOPSIS\n"
         << program_name << " <filename>.<desired-result>\n"
         << "\n"
         << "desired-result: return code the program ends with" << std::endl;

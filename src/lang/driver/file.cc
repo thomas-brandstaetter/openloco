@@ -2,8 +2,9 @@
 // Created by Thomas Brandstätter on 12/05/2018.
 //
 
-#include "file.h"
+#include <driver/file.h>
 
+#include <cassert>
 #include <fstream>
 
 namespace openloco {
@@ -19,9 +20,8 @@ namespace lang {
     void file::open(std::istream& in)
     {
         std::string line;
-        while ( std::getline(in, line) )
+        while (std::getline(in, line))
             _lines.push_back(line);
-
     }
 
     void file::reset()
@@ -31,12 +31,7 @@ namespace lang {
 
     std::string file::get_line(unsigned long number)
     {
-        if (number <= 0)
-            return "<line underflow>";
-
-        if (number > _lines.size())
-            return "<line overflow>";
-
+        assert (number <= _lines.size());       // error in users logic
         return _lines[number - 1];
     }
 

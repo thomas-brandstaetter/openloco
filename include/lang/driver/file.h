@@ -1,7 +1,4 @@
 #pragma once
-//
-// Created by Thomas Brandstätter on 12/05/2018.
-//
 
 #include <istream>
 #include <string>
@@ -14,15 +11,21 @@ namespace lang {
     class file_streambuffer;
     class scanner;
 
+#pragma mark - file
     /**
-     * Represents a file for parsing process. It keeps track of lines for better error reporting.
+     * Represents an input file for the parsing process. It keeps track of
+     * lines for better error reporting.
      *
-     * @details The purpose of the class is to write missing flex behaviour. Flex lacks of support of getting the
-     * current line it's reading from.
+     * @details The purpose of the class is to write missing flex behaviour.
+     * Flex lacks of support of getting the current line it's reading from.
      */
     class file
     {
     public:
+
+        /** \addtogroup File operations */
+        /** @{ */
+
         /**
          * Read file into buffer
          * @param filename The filename of the file to open
@@ -35,17 +38,21 @@ namespace lang {
          */
         void open(std::istream& in);
 
-        /**
-         * Empty buffer
-         */
+        /** Empty buffer */
         void reset();
 
+        /** @} */
+
+        /** \addtogroup Access */
+        /** @{ */
+
         /**
-         *
          * @param number
          * @return
          */
         std::string get_line(unsigned long number);
+
+        /** @} */
 
         friend file_streambuffer;
         friend scanner;
@@ -53,6 +60,7 @@ namespace lang {
         std::vector<std::string> _lines;
     };
 
+#pragma mark - file_streambuffer
     /**
      * Represents an streambuf for file in order to use a file as istream object.
      */
@@ -64,7 +72,7 @@ namespace lang {
         }
 
     private:
-        int_type underflow();
+        int_type underflow() override;
 
 
     private:

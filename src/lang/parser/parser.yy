@@ -309,6 +309,51 @@
 %type  <std::string>                        std__init
 
 
+
+
+    // B.1.4 Variables
+
+
+    // B.1.4.1 Directly represented variables
+
+%type  <ast::size_prefix>       size_prefix
+%type  <ast::location_prefix>       location_prefix
+%type  <ast::direct_variable>       direct_variable
+%type  <ast::direct_variable::positions>    dv__positions
+
+    // B.1.4.2 Multi-element variables
+
+%type  <ast::multi_element_variable>    multi_element_variable
+%type  <ast::array_variable>            array_variable
+%type  <ast::structured_variable>       structured_variable
+%type  <ast::symbolic_variable>         symbolic_variable
+
+%type  <ast::symbolic_variable>         subscripted_variable
+%type  <std::vector<std::string>>       subscript_list
+%type  <std::string>                    subscript
+
+%type  <ast::symbolic_variable>         record_variable
+%type  <std::string>                    field_selector
+%type  <std::vector<std::string>>       sl__subscripts
+
+    // B.1.4.3 Declaration and initialization
+
+%type  <ast::retain_value>              ids__retain
+%type  <ast::edge_value>                ed__edge
+
+%type  <ast::var1_init_decl>            var1_init_decl
+%type  <ast::var1_init_decl::spec_init> v1id__spec_init
+%type  <std::vector<std::string>>       var1_list
+%type  <std::vector<std::string>>       v1l__identifiers
+
+%type  <ast::fb_name_decl>              fb_name_decl
+%type  <std::string>                    fb_name
+%type  <std::vector<std::string>>       fnl__names
+%type  <std::vector<std::string>>       fb_name_list
+
+%type  <ast::array_var_init_decl>       array_var_init_decl
+%type  <ast::structured_var_init_decl>  structured_var_init_decl
+
 %start file
 %%
 
@@ -442,53 +487,53 @@ duration
     ;
 
 interval
-    : days              { $$ = driver.dc.days_in_ms($1); }
-    | hours             { $$ = driver.dc.hours_in_ms($1); }
-    | minutes           { $$ = driver.dc.minutes_in_ms($1); }
-    | seconds           { $$ = driver.dc.seconds_in_ms($1); }
+    : days              { $$ = $1; }
+    | hours             { $$ = $1; }
+    | minutes           { $$ = $1; }
+    | seconds           { $$ = $1; }
     | milliseconds      { $$ = $1; }
     ;
 
 days
-    : FIXED_POINT "d"           { $$ = driver.dc.days_in_ms($1); }
+    : FIXED_POINT "d"           { $$ = $1; }
     | INTEGER "d" "_" hours     {
-        $$ = driver.dc.days_in_ms($1);
-        $$ += driver.dc.hours_in_ms($4);
+        $$ = $1;
+        $$ += $4;
     }
     | INTEGER "d" hours         {
-        $$ = driver.dc.days_in_ms($1);
-        $$ += driver.dc.hours_in_ms($3);
+        $$ = $1;
+        $$ += $3;
     }
     ;
 
 hours
-    : FIXED_POINT "h"           { $$ = driver.dc.hours_in_ms($1); }
+    : FIXED_POINT "h"           { $$ = $1; }
     | INTEGER "h" "_" minutes   {
-        $$  = driver.dc.hours_in_ms($1);;
-        $$ += driver.dc.minutes_in_ms($4);;
+        $$  = $1;
+        $$ += $4;
     }
     | INTEGER "h" minutes {
-        $$  = driver.dc.hours_in_ms($1);;
-        $$ += driver.dc.minutes_in_ms($3);;
+        $$  = $1;
+        $$ += $3;
     }
     ;
 
 minutes
-    : FIXED_POINT "m"           { $$ = driver.dc.minutes_in_ms($1); }
+    : FIXED_POINT "m"           { $$ = $1; }
     | INTEGER "m" seconds       {
-        $$ += driver.dc.minutes_in_ms($1);
-        $$ += driver.dc.seconds_in_ms($3);
+        $$ += $1;
+        $$ += $3;
     }
     | INTEGER "m" "_" seconds   {
-        $$ += driver.dc.minutes_in_ms($1);
-        $$ += driver.dc.seconds_in_ms($4);
+        $$ += $1;
+        $$ += $4;
     }
     ;
 
 seconds
-    : FIXED_POINT "s"           { $$ = driver.dc.seconds_in_ms($1); }
-    | INTEGER "s" milliseconds  { $$ += driver.dc.seconds_in_ms($1); $$ += $3; }
-    | INTEGER "s" "_" milliseconds { $$ += driver.dc.seconds_in_ms($1); $$ += $4; }
+    : FIXED_POINT "s"           { $$ = $1; }
+    | INTEGER "s" milliseconds  { $$ += $1; $$ += $3; }
+    | INTEGER "s" "_" milliseconds { $$ += $1; $$ += $4; }
     ;
 
 milliseconds
@@ -959,26 +1004,36 @@ variable_name: IDENTIFIER;
     // B.1.4.1 Directly represented variables
     // -----------------------------------------------------------------------
 
-direct_variable: PERCENT location_prefix size_prefix INTEGER directive_variable__positions;
+direct_variable
+    : PERCENT location_prefix size_prefix INTEGER dv__positions {
+        $$.location = $2;
+        $$.size = $3;
+        $5.push_back($4);
+        $$.position = $5;
+    }
+    ;
 
-directive_variable__positions
-    : DOT INTEGER directive_variable__positions
+dv__positions
+    : DOT INTEGER dv__positions {
+        $3.push_back($2);
+        std::swap($$, $3);
+    }
     |
     ;
 
 location_prefix
-    : "I"
-    | "Q"
-    | "M"
+    : "I"       { $$ = ast::location_prefix::I; }
+    | "Q"       { $$ = ast::location_prefix::Q; }
+    | "M"       { $$ = ast::location_prefix::M; }
     ;
 
 size_prefix
-    :
-    | "X"
-    | "B"
-    | "W"
-    | "D"
-    | "L"
+    : "X"       { $$ = ast::size_prefix::X; }
+    | "B"       { $$ = ast::size_prefix::B; }
+    | "W"       { $$ = ast::size_prefix::W; }
+    | "D"       { $$ = ast::size_prefix::D; }
+    | "L"       { $$ = ast::size_prefix::L; }
+    |
     ;
 
 
@@ -988,28 +1043,54 @@ size_prefix
 
 multi_element_variable
     : array_variable
-    | structured_variable
+    | structured_variable   { $$ = $1; }
     ;
 
-array_variable: subscripted_variable subscript_list;
+array_variable
+    : subscripted_variable subscript_list {
+        $$.variable = $1;
+        $$.subscripts = $2;
+    }
+    ;
 
-subscripted_variable: symbolic_variable;
+subscripted_variable
+    : symbolic_variable     { $$ = $1; }
+    ;
 
-subscript_list: LSQUAREB subscript sl__subscripts RSQUAREB;
+subscript_list
+    : LSQUAREB subscript sl__subscripts RSQUAREB {
+        $3.insert($3.begin(), $2);
+        std::swap($$, $3);
+    }
+    ;
 
 sl__subscripts
-    : sl__subscripts "," subscript
+    : sl__subscripts COMMA subscript {
+        $1.push_back($3);
+        std::swap($$, $1);
+    }
     |
     ;
 
 
-subscript: IDENTIFIER;
+subscript
+    : IDENTIFIER        { $$ = $1; }
+    ;
 
-structured_variable: record_variable DOT field_selector;
+structured_variable
+    : record_variable DOT field_selector {
+        $$.record = $1;
+        $$.field = $3;
+    }
+    ;
 
-record_variable: symbolic_variable;
+record_variable
+    : symbolic_variable { $$ = $1; }
+    ;
 
-field_selector: IDENTIFIER;
+field_selector
+    : IDENTIFIER        { $$ = $1; }
+    ;
 
 
     // -----------------------------------------------------------------------
@@ -1017,14 +1098,18 @@ field_selector: IDENTIFIER;
     // -----------------------------------------------------------------------
 
 input_declarations
-    : VAR_INPUT RETAIN input_declaration SEMICOLON ids__declarations END_VAR
-    | VAR_INPUT NON_RETAIN input_declaration SEMICOLON ids__declarations END_VAR
-    | VAR_INPUT input_declaration SEMICOLON ids__declarations END_VAR;
+    : VAR_INPUT ids__retain ids__declarations END_VAR;
 
+
+ids__retain
+    : RETAIN            { $$ = ast::retain_value::RETAIN; }
+    | NON_RETAIN        { $$ = ast::retain_value::NON_RETAIN; }
+    |                   { $$ = ast::retain_value::UNDEFINED; }
+    ;
 
 ids__declarations
     : ids__declarations input_declaration SEMICOLON
-    |
+    | input_declaration SEMICOLON
     ;
 
 input_declaration
@@ -1037,9 +1122,9 @@ edge_declaration
     ;
 
 ed__edge
-    : R_EDGE
-    | F_EDGE
-    |
+    : R_EDGE            { $$ = ast::edge_value::R_EDGE; }
+    | F_EDGE            { $$ = ast::edge_value::F_EDGE; }
+    |                   { $$ = ast::edge_value::UNDEFINED; }
     ;
 
 var_init_decl
@@ -1051,9 +1136,14 @@ var_init_decl
     ;
 
 var1_init_decl
-    : var1_list COLON simple_spec_init
-    | var1_list COLON subrange_spec_init
-    | var1_list COLON enumerated_spec_init;
+    : var1_list COLON v1id__spec_init
+    ;
+
+v1id__spec_init
+    : simple_spec_init
+    | subrange_spec_init
+    | enumerated_spec_init
+    ;
 
 var1_list: IDENTIFIER v1l__identifiers;
 
@@ -1071,29 +1161,50 @@ structured_var_init_decl
     ;
 
 fb_name_decl
-    : fb_name_list COLON IDENTIFIER
-    | fb_name_list COLON IDENTIFIER DEF structure_initialization
+    : fb_name_list COLON IDENTIFIER DEF structure_initialization {
+        $$.fb_names = $1;
+        $$.name = $3;
+        $$.initialization = $5;
+    }
+    | fb_name_list COLON IDENTIFIER {
+        $$.fb_names = $1;
+        $$.name = $3;
+    }
     ;
 
 
-fb_name_list: fb_name fnl__names;
+fb_name_list
+    : fb_name fnl__names {
+        $2.insert($2.begin(), $1);
+        std::swap($$, $2);
+    }
+    ;
 
 fnl__names
-    :  fnl__names COMMA fb_name
+    :  fnl__names COMMA fb_name {
+        $1.push_back($3);
+        std::swap($$, $1);
+    }
     |
     ;
 
-fb_name: IDENTIFIER;
+fb_name
+    : IDENTIFIER        { $$ = $1; }
+    ;
 
 output_declarations
-    : VAR_OUTPUT RETAIN var_init_decl SEMICOLON  output_declarations__init_decls END_VAR
-    | VAR_OUTPUT NON_RETAIN var_init_decl SEMICOLON  output_declarations__init_decls END_VAR
-    | VAR_OUTPUT var_init_decl SEMICOLON  output_declarations__init_decls END_VAR
+    : VAR_OUTPUT od__retain od__init_decls END_VAR
     ;
 
-output_declarations__init_decls
-    : output_declarations__init_decls var_init_decl SEMICOLON
+od__retain
+    : RETAIN
+    | NON_RETAIN
     |
+    ;
+
+od__init_decls
+    : od__init_decls var_init_decl SEMICOLON
+    | var_init_decl SEMICOLON
     ;
 
 input_output_declarations: "VAR_IN_OUT" var_declaration SEMICOLON input_output_declarations__declarations END_VAR;

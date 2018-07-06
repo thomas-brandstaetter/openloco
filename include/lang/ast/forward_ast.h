@@ -1,8 +1,5 @@
 #pragma once
 /**
- *
- * @details inspired by boost::spirit::x3 forward_ast class
- *
  * @author Thomas Brandstätter
  * @date 11.05.18.
  */
@@ -16,10 +13,7 @@ namespace ast {
     template<typename T>
     class forward_ast
     {
-
     public:
-
-        using type = T;
 
         /** \addtogroup Constructors */
         /** @{ */
@@ -54,12 +48,16 @@ namespace ast {
             delete _ptr;
         }
 
+        /** \addtogroup Observers */
+        /** @{ */
+
         T& get() { return *_ptr; }
         const T& get() const { return *_ptr; }
 
+        /** @} */
+
         /** \addtogroup Operators */
         /** @{ */
-
 
         forward_ast& operator=(forward_ast const& rhs)
         {

@@ -1,4 +1,7 @@
 
+set(HEADER_DIRECTORY ${CMAKE_SOURCE_DIR}/include/lang)
+
+include_directories(${HEADER_DIRECTORY})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -20,15 +23,25 @@ FLEX_TARGET(
 ADD_FLEX_BISON_DEPENDENCY(scanner parser)
 
 
+set(    PARSER_HEADERS
+        ${HEADER_DIRECTORY}/ast/ast.h
+        ${HEADER_DIRECTORY}/ast/forward_ast.h
+        ${HEADER_DIRECTORY}/ast/meta.h
+
+        ${HEADER_DIRECTORY}/driver/file.h
+        ${HEADER_DIRECTORY}/driver/driver.h
+        ${HEADER_DIRECTORY}/scanner/scanner.h
+
+)
+
 add_library(
         parser
         driver/driver.cc
+        driver/file.cc
         driver/error.cc
-        scanner/scanner.h
-        ast/ast.h
         ${CMAKE_CURRENT_BINARY_DIR}/parser.hh
         ${FLEX_scanner_OUTPUTS}
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}
-        ${parser_HEADERS}
-        ast/forward_ast.h driver/file.cc driver/file.h)
+        ${PARSER_HEADERS}
+        )

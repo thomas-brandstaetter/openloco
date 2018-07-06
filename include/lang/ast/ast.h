@@ -10,10 +10,12 @@
 #include <vector>
 
 #include "forward_ast.h"
+#include "meta.h"
 
 namespace openloco {
 namespace lang {
 namespace ast {
+
 
     template<typename VT>
     struct value_wrapper
@@ -424,5 +426,113 @@ namespace ast {
     using temporary_root = std::vector<type_declaration>;
 
     using root = temporary_root;
+
+
+#pragma mark - B.1.4. Variables
+    struct direct_variable;
+    struct array_variable;
+    struct structured_variable;
+
+    using multi_element_variable = std::variant<
+        forward_ast<array_variable>,
+        forward_ast<structured_variable>>;
+
+    using variable_name = std::string;
+
+    using symbolic_variable = std::variant<
+        variable_name,
+        forward_ast<multi_element_variable>>;
+
+    using variable = std::variant<
+        forward_ast<direct_variable>,
+        symbolic_variable>;
+
+
+#pragma mark - B.1.4.1 Directly represented variables
+
+
+    enum class size_prefix {
+        X, B, W, D, L
+    };
+
+    enum class location_prefix {
+        I, Q, M
+    };
+
+    struct direct_variable {
+        using positions = std::vector<long>;
+
+        location_prefix location;
+        size_prefix size;
+
+        positions position;
+    };
+
+
+#pragma mark - B.1.4.2 Multi-element variables
+
+    using field_selector = std::string;
+    using record_variable = symbolic_variable;
+
+    struct structured_variable
+    {
+        record_variable record;
+        field_selector field;
+    };
+
+
+    using subscript = std::string;
+    using subscripted_variable = symbolic_variable;
+    using subscript_list = std::vector<subscript>;
+
+    struct array_variable {
+        subscripted_variable variable;
+        subscript_list subscripts;
+    };
+
+#pragma mark - B.1.4.3 Declaration and initialization
+
+    enum class retain_value {
+        RETAIN, NON_RETAIN, CONSTANT, UNDEFINED
+    };
+
+    enum class edge_value {
+        R_EDGE, F_EDGE, UNDEFINED
+    };
+
+
+    using var1_list = std::vector<std::string>;
+
+    struct var1_init_decl {
+        using spec_init = std::variant<
+            simple_type_declaration::spec_init,
+            subrange_type_declaration::spec_init,
+            enumerated_type_declaration::spec_init>;
+
+        spec_init specification;
+        var1_list variables;
+    };
+
+    struct array_var_init_decl
+    {
+        var1_list variables;
+        array_type_declaration::spec_init specification;
+    };
+
+    struct structured_var_init_decl {
+        var1_list variables;
+        initialized_structure init;
+    };
+
+    using fb_name_list = std::vector<std::string>;
+    using fb_name = std::string;
+
+    struct fb_name_decl
+    {
+        fb_name_list fb_names;
+        std::string name;
+        structure_initialization initialization;
+    };
+
 
 }}}

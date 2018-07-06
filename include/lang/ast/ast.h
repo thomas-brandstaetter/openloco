@@ -17,6 +17,14 @@ namespace lang {
 namespace ast {
 
 
+    /**
+     * value_wrapper
+     *
+     * On some places cpp requires non-fundamental types, therefore we wrap it.
+     *
+     * @see https://en.cppreference.com/w/cpp/language/types
+     * @tparam VT The type to wrap
+     */
     template<typename VT>
     struct value_wrapper
     {
@@ -28,9 +36,20 @@ namespace ast {
         virtual ~value_wrapper() {}
 
         VT value;
+
+        operator VT () { return value; }
     };
 
 
+    /**
+     * type_declaration_base
+     *
+     * All type declarations in IEC 61131-3 have the same structure, this struct implements the common structure.
+     *
+     * @tparam TNT The type name type
+     * @tparam ST The specification type
+     * @tparam VT The value type
+     */
     template<typename TNT, typename ST, typename VT>
     struct type_declaration_base {
 
@@ -104,9 +123,9 @@ namespace ast {
 
     struct daytime
     {
-        double hour;
-        double minute;
-        double second;
+        value_wrapper<double> hour;
+        value_wrapper<double> minute;
+        value_wrapper<double> second;
     };
 
     struct time_of_day : daytime

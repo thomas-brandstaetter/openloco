@@ -1,7 +1,8 @@
 # openloco - The open logic controller
 
-openloco is an open source implementation of IEC 61131-3 languages, STL, IL, FBD, LD
+openloco is an open source implementation of IEC 61131-3 languages - espacially STL
 
+Take a look on the develop branch to see recent developments. 
 
 ## Make IEC 61131-3 great again
 

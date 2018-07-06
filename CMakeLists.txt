@@ -70,7 +70,14 @@ find_package(FLEX REQUIRED)
 	message("**    ${FLEX_version_output}")
 	include_directories(${FLEX_INCLUDE_DIRS})
 
+find_package(Boost COMPONENTS system thread program_options REQUIRED)
+	message("**    ${Boost_VERSION}")
+	include_directories(${BOOST_INCLUDEDIR})
+	link_directories(${BOOST_LIBRARYDIR})
 
+set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.10.1/clang_64")
+find_package(Qt5 COMPONENTS Core REQUIRED)
+        message("**    Qt ")
 
 # ----------------------------------------------------------------------------
 # CTEST CDASH

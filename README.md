@@ -9,18 +9,20 @@ Goals:
 
 * Multiplatform:  Linux, Unix, macOS, Windows
 * Implement the full Standard (based on IEC:2003)
-* Postscript output of graphic languages
-* Compiles into LLVM IR to support as many target plattform as possible
+* Postscript output of graphical languages
+* Compiles into LLVM 7 IL to support as many target plattform as possible
+    * take a look at [LLVM Targets](https://llvm.org/devmtg/2014-04/PDFs/LightningTalks/2014-3-31_ClangTargetSupport_LighteningTalk.pdf)
 * Bindings for popular languages
+    * Python, C++, C#, Java, ... 
 * Virutal PLC
     * Virtual Raspberry Pi
     * Virtual Arduino
-    * Virtual usual PLC
+    * Virtual PLC
 * Configurations files for various systems to use it with conformance
-    * Arduino
     * Raspberry Pi
+    * Arduino
 * Package manager for programs and modules
- 
+
 ## Current Status 
     
 * Implement parts of the standard
@@ -31,7 +33,7 @@ Tools used in this project
 
 * C++ 17
 * python
-* cmake
+* cmake, ninja
 * bison/flex
 * postscript
 * LLVM

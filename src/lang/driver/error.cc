@@ -38,7 +38,7 @@ namespace lang {
         "Numerical result exceeds range for data type", "Current result and operand not of same data type",
         "Division by zero", "Numerical result exceeds range for data type", "Invalid data type for operation",
         "Return from function without value assigned", "Iteration fails to terminate",
-        "Same 11_identifier used as connector label and element name", "Uninitialized feedback variable"
+        "Same identifier used as connector label and element name", "Uninitialized feedback variable"
     };
 
     const std::vector<std::string> error::error_subclauses = {

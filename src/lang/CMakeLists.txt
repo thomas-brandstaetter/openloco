@@ -25,6 +25,7 @@ ADD_FLEX_BISON_DEPENDENCY(scanner parser)
 
 set(    PARSER_HEADERS
         ${HEADER_DIRECTORY}/ast/ast.h
+        ${HEADER_DIRECTORY}/ast/ast_codegen.h
         ${HEADER_DIRECTORY}/ast/forward_ast.h
         ${HEADER_DIRECTORY}/ast/meta.h
 
@@ -32,7 +33,7 @@ set(    PARSER_HEADERS
         ${HEADER_DIRECTORY}/driver/driver.h
         ${HEADER_DIRECTORY}/scanner/scanner.h
 
-)
+        ../../include/lang/ast/ast_codegen.h)
 
 add_library(
         parser

@@ -10,12 +10,21 @@ namespace openloco {
 namespace lang {
 namespace ast {
 
+    /**
+     * forward_ast
+     *
+     * The grammer to define has circular dependencies, e.g. between IEC 61131-3 arrays and structures.
+     * C++ is not able to reflect such dependencies in the type system, therefore we break the circle with a forward
+     * declaration on type basis.
+     *
+     * @tparam T The type to forward
+     */
     template<typename T>
     class forward_ast
     {
     public:
 
-        /** \addtogroup Constructors */
+        /** \addtogroup Object lifecycle */
         /** @{ */
 
         forward_ast() : _ptr(new T)
@@ -41,12 +50,12 @@ namespace ast {
         {
         }
 
-        /** @} */
-
         ~forward_ast()
         {
             delete _ptr;
         }
+
+        /** @} */
 
         /** \addtogroup Observers */
         /** @{ */

@@ -9,8 +9,8 @@ Goals:
 
 * Multiplatform:  Linux, Unix, macOS, Windows
 * Implement the full Standard (based on IEC:2003)
-* Postscript output of graphical languages
-* Just-In-Time Compiling of STL code.
+* Postscript for vector graphics output of graphical languages
+* Just-In-Time compiling of STL code.
 * Compiles into LLVM 7 IL to support as many target plattform as possible
     * take a look at [LLVM Targets](https://llvm.org/devmtg/2014-04/PDFs/LightningTalks/2014-3-31_ClangTargetSupport_LighteningTalk.pdf)
 * Bindings for popular languages
@@ -26,7 +26,10 @@ Goals:
 
 ## Current Status 
     
-* Implement parts of the standard
+* Implement the standard
+* use LLVM to
+    * code generation 
+    * prepare JIT
  
 ## Development
 

@@ -71,7 +71,6 @@ find_package(FLEX REQUIRED)
 	include_directories(${FLEX_INCLUDE_DIRS})
 
 find_package(Boost COMPONENTS system thread program_options REQUIRED)
-	message("**    ${Boost_VERSION}")
 	include_directories(${BOOST_INCLUDEDIR})
 	link_directories(${BOOST_LIBRARYDIR})
 
@@ -81,6 +80,12 @@ find_package(LLVM 6.0 REQUIRED all-targets analysis asmparser asmprinter bitread
         mcdisassembler mcparser objcarcopts object option profiledata scalaropts
         selectiondag support tablegen target transformutils vectorize
         windowsmanifest)
+    message("**    LLVM version:   ${LLVM_VERSION_BASE_STRING}")
+    message("**    Target Triple:  ${LLVM_HOST_TARGET}")
+
+    include_directories(${LLVM_INCLUDE_DIRS})
+    link_directories(${LLVM_LIBRARY_DIRS})
+
 
 set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.10.1/clang_64")
 find_package(Qt5 COMPONENTS Core REQUIRED)

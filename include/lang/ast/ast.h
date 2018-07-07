@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "ast_codegen.h"
 #include "forward_ast.h"
 #include "meta.h"
 

@@ -15,8 +15,8 @@ public:
     /**
      * codegen
      *
-     * AST objects are used to build llvm::Value objects. This method handles the transformation from AST to LLVM IL.
-     * A value is used to build IR code by llvm.
+     * AST objects are used to build llvm::Value objects. Implemented methods handles the transformation from AST to
+     * LLVM IR. In other words a value is used to build IR code by llvm.
      *
      * @see http://llvm.org/doxygen/classllvm_1_1Value.html
      * @return llvm::Value

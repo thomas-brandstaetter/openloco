@@ -53,6 +53,8 @@ namespace ast {
     template<typename TNT, typename ST, typename VT>
     struct type_declaration_base {
 
+        virtual ~type_declaration_base() {}
+
         struct spec_init
         {
             ST specification;

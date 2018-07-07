@@ -10,6 +10,7 @@ Goals:
 * Multiplatform:  Linux, Unix, macOS, Windows
 * Implement the full Standard (based on IEC:2003)
 * Postscript output of graphical languages
+* Just-In-Time Compiling of STL code.
 * Compiles into LLVM 7 IL to support as many target plattform as possible
     * take a look at [LLVM Targets](https://llvm.org/devmtg/2014-04/PDFs/LightningTalks/2014-3-31_ClangTargetSupport_LighteningTalk.pdf)
 * Bindings for popular languages
@@ -31,7 +32,7 @@ Goals:
 
 Tools used in this project
 
-* C++ 17
+* C++ 17, Boost, Qt
 * python
 * cmake, ninja
 * bison/flex

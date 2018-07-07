@@ -75,6 +75,13 @@ find_package(Boost COMPONENTS system thread program_options REQUIRED)
 	include_directories(${BOOST_INCLUDEDIR})
 	link_directories(${BOOST_LIBRARYDIR})
 
+find_package(LLVM 6.0 REQUIRED all-targets analysis asmparser asmprinter bitreader bitwriter codegen core
+        debuginfocodeview debuginfodwarf debuginfomsf debuginfopdb globalisel
+        instcombine ipa ipo instrumentation irreader libdriver linker lto mc
+        mcdisassembler mcparser objcarcopts object option profiledata scalaropts
+        selectiondag support tablegen target transformutils vectorize
+        windowsmanifest)
+
 set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.10.1/clang_64")
 find_package(Qt5 COMPONENTS Core REQUIRED)
         message("**    Qt ")

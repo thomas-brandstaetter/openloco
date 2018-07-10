@@ -16,8 +16,13 @@ namespace ast {
 namespace meta {
 
     /**
-     * Provide meta information about the ast object
+     * class_info
      *
+     * Provide meta information about the ast object, in order to improve introspection capabilities at runtime.
+     *
+     *
+     * Provided informations are
+     *  - class_name
      */
     class class_info final {
 

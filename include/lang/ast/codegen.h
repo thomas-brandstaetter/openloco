@@ -4,13 +4,18 @@
  * @date 07.07.18.
  */
 
-#include <llvm/IR/Value.h>
+// #include <llvm/IR/Value.h>
 
 
-class ast_codegen
+class codegen
 {
 public:
-    virtual ~ast_codegen() {}
+    codegen()
+    {
+    }
+    virtual ~codegen()
+    {
+    }
 
     /**
      * codegen
@@ -20,6 +25,8 @@ public:
      *
      * @see http://llvm.org/doxygen/classllvm_1_1Value.html
      * @return llvm::Value
+     *
+     * @todo llvm::value has a protected desctructor
      */
-    virtual std::unique_ptr<llvm::Value> codegen() = 0;
+    // virtual llvm::Value * generate() = 0;
 };

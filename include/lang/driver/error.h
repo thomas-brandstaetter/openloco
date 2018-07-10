@@ -16,6 +16,11 @@
 namespace openloco {
 namespace lang {
 
+    /**
+     * error
+     *
+     * This class representing syntax errors detected while scanning and parsing process.
+     */
     class error
     {
     public:
@@ -69,7 +74,7 @@ namespace lang {
         } error_type;
 
         /**
-         * Holds error messages according to error_type
+         * Holds error messages according to the error_type
          */
         static const std::vector<std::string> error_messages;
 
@@ -79,20 +84,30 @@ namespace lang {
         static error make_error(error_type type, class file& file, location loc);
         static error make_custom_error(std::string message, class file& file, location loc);
 
-    public:
         void print(std::ostream& is = std::cerr);
 
-    private:
 
+
+        /** \addtogroup Object lifecycle */
+        /** @{ */
+
+        /**
+         * @param file The file in which the error occurs
+         * @param loc  The location within the file where the error occurs
+         */
         error(file& file, location loc) : _file(file), _loc(loc)
         {
         }
 
+        ~error() = default;
+
+        /** @} */
+
+    private:
         error_type _type;
         std::string _subclass;
         std::string _message;
         class file& _file;
         location _loc;
     };
-
 }}

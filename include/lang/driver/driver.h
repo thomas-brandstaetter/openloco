@@ -42,7 +42,7 @@ namespace lang {
     class driver {
     public:
 
-        /** \addtogroup Constructors */
+        /** \addtogroup Object lifecycle */
         /** @{ */
         driver() :
             _tokens(),
@@ -50,11 +50,12 @@ namespace lang {
             _current_file(nullptr)
         {
         }
-        /** @} */
 
         virtual ~driver()
         {
         }
+
+        /** @} */
 
         /** \addtogroup Parsing */
         /** @{ */

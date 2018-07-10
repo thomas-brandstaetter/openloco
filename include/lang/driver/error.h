@@ -59,7 +59,7 @@ namespace lang {
             ,E_unsafe_sfc
             ,E_unreadable_sfc
             ,E_type_conflict
-            ,in_var_access
+            ,E_in_var_access
             ,E_task_fails_to_schedule
             ,E_task_fails_meet_deadline
             ,E_numeric_exceeds_range

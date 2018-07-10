@@ -24,11 +24,17 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-message("** COMPILER")
-message("**    Build type:      ${CMAKE_BUILD_TYPE}")
-message("**    Generator:       ${CMAKE_GENERATOR}")
-message("**    C compiler:      ${CMAKE_C_COMPILER_ID}")
-message("**    C++ compiler:    ${CMAKE_CXX_COMPILER_ID}")
+message("-- HOST_SYSTEM")
+message("--    name:            ${CMAKE_HOST_SYSTEM_NAME}")
+message("--    version:         ${CMAKE_HOST_SYSTEM_VERSION}")
+message("--    processor:       ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message("--    system:          ${CMAKE_HOST_SYSTEM}")
+
+message("-- COMPILER")
+message("--    Build type:      ${CMAKE_BUILD_TYPE}")
+message("--    Generator:       ${CMAKE_GENERATOR}")
+message("--    C compiler:      ${CMAKE_C_COMPILER_ID}")
+message("--    C++ compiler:    ${CMAKE_CXX_COMPILER_ID}")
 
 # ----------------------------------------------------------------------------
 # Include / Link directories

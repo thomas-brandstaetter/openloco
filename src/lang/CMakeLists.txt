@@ -25,15 +25,16 @@ ADD_FLEX_BISON_DEPENDENCY(scanner parser)
 
 set(    PARSER_HEADERS
         ${HEADER_DIRECTORY}/ast/ast.h
-        ${HEADER_DIRECTORY}/ast/ast_codegen.h
+        ${HEADER_DIRECTORY}/ast/codegen.h
         ${HEADER_DIRECTORY}/ast/forward_ast.h
         ${HEADER_DIRECTORY}/ast/meta.h
 
         ${HEADER_DIRECTORY}/driver/file.h
         ${HEADER_DIRECTORY}/driver/driver.h
+
         ${HEADER_DIRECTORY}/scanner/scanner.h
 
-        ../../include/lang/ast/ast_codegen.h)
+        ${HEADER_DIRECTORY}/codegen/code_generator.h)
 
 add_library(
         parser
@@ -45,4 +46,11 @@ add_library(
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}
         ${PARSER_HEADERS}
-        )
+        codegen/code_generator.cc)
+
+
+target_link_libraries(
+        parser
+        ${$OPENLOCO_LLVM_LIBS}
+
+)

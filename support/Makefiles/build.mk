@@ -1,7 +1,7 @@
 DEBUG_DIR=/build/debug
 CC=/opt/local/bin/clang-mp-6.0
 CXX=/opt/local/bin/clang++-mp-6.0
-CMAKE_PREFIX_PATH=/opt/local
+CMAKE_PREFIX_PATH=/opt/local:/opt/local/libexec/llvm-6.0
 CMAKE_FLAGS="-DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH)"
 
 debug:

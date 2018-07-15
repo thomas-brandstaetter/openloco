@@ -25,7 +25,6 @@ ADD_FLEX_BISON_DEPENDENCY(scanner parser)
 
 set(    PARSER_HEADERS
         ${HEADER_DIRECTORY}/ast/ast.h
-        ${HEADER_DIRECTORY}/ast/codegen.h
         ${HEADER_DIRECTORY}/ast/forward_ast.h
         ${HEADER_DIRECTORY}/ast/meta.h
 
@@ -34,7 +33,8 @@ set(    PARSER_HEADERS
 
         ${HEADER_DIRECTORY}/scanner/scanner.h
 
-        ${HEADER_DIRECTORY}/codegen/code_generator.h)
+        ${HEADER_DIRECTORY}/codegen/code_generator.h
+        ${HEADER_DIRECTORY}/codegen/code_visitor.h)
 
 add_library(
         parser
@@ -46,7 +46,8 @@ add_library(
         ${BISON_parser_OUTPUTS}
         ${ADDITIONAL_SOURCES}
         ${PARSER_HEADERS}
-        codegen/code_generator.cc)
+        codegen/code_generator.cc
+)
 
 
 target_link_libraries(

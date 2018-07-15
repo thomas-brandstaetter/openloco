@@ -76,10 +76,13 @@ find_package(FLEX REQUIRED)
 	message("--    ${FLEX_version_output}")
 	include_directories(${FLEX_INCLUDE_DIRS})
 
+
 find_package(Boost COMPONENTS system thread program_options REQUIRED)
 	include_directories(${BOOST_INCLUDEDIR})
 	link_directories(${BOOST_LIBRARYDIR})
 
+
+# see: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
 # TODO: put LLVM_CONFIG_DIR into CMAKE_PREFIX_PATH
 
 set(LLVM_DIR "/opt/local/libexec/llvm-6.0/")
@@ -96,7 +99,7 @@ find_package(LLVM 6.0 REQUIRED CONFIG)
 
 set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.10.1/clang_64")
 find_package(Qt5 COMPONENTS Core REQUIRED)
-        message("--    Qt ")
+        message("-- Qt ")
 
 # ----------------------------------------------------------------------------
 # CTEST CDASH
@@ -119,3 +122,4 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(test)
 
+message("-- Configuring end")

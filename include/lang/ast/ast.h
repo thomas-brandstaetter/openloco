@@ -5,17 +5,27 @@
  */
 
 #include <algorithm>
+#include <map>
 #include <string>
 #include <variant>
 #include <vector>
 
-#include "ast_codegen.h"
+//#include <llvm/IR/LLVMContext.h>
+//#include <llvm/IR/IRBuilder.h>
+//#include <llvm/IR/Module.h>
+//#include <llvm/IR/Value.h>
+
 #include "forward_ast.h"
 #include "meta.h"
 
 namespace openloco {
 namespace lang {
 namespace ast {
+
+//    static llvm::LLVMContext context;
+//    static llvm::IRBuilder<> builder(context);
+//    static std::unique_ptr<llvm::Module> module;
+//    static std::map<std::string, llvm::Value *> named_values;
 
 
     /**
@@ -24,21 +34,21 @@ namespace ast {
      * On some places cpp requires non-fundamental types, therefore we wrap it.
      *
      * @see https://en.cppreference.com/w/cpp/language/types
-     * @tparam VT The type to wrap
+     * @tparam FT The fundamental type to wrap
      */
-    template<typename VT>
+    template<typename FT>
     struct value_wrapper
     {
 
         value_wrapper() : value() {}
-        value_wrapper(VT& rhs) : value(rhs) {}
-        value_wrapper(const VT& rhs) : value(rhs) {}
+        value_wrapper(FT& rhs) : value(rhs) {}
+        value_wrapper(const FT& rhs) : value(rhs) {}
 
         virtual ~value_wrapper() {}
 
-        VT value;
+        FT value;
 
-        operator VT () { return value; }
+        operator FT () { return value; }
     };
 
 
@@ -77,6 +87,9 @@ namespace ast {
 #pragma mark - B.1 Common elements
 #pragma mark - B.1.1 Letters, digits and identifiers
 
+    struct identifier : std::string
+    {
+    };
 
 #pragma mark - B.1.2.1 Numeric literals
 
@@ -266,7 +279,7 @@ namespace ast {
     // subrange ----------------------
 
     struct subrange {
-        long min;       // TODO: IEC type instead of C++ ones
+        long min;       // TODO: IEC type instead of C++ ones?
         long max;
 
         using list = std::vector<subrange>;
@@ -556,5 +569,506 @@ namespace ast {
         structure_initialization initialization;
     };
 
+
+
+
+
+
+
+#pragma mark - B.2 Language IL (Instruction List)
+#pragma mark - B.2.1 Instructions and operands
+
+    struct il_instruction;
+    struct il_simple_operation;
+    struct il_expression;
+    enum class il_simple_operator;
+    enum class il_expr_operator;
+    struct il_jump_operation;
+    struct il_fb_call;
+    //struct il_formal_funct_call;
+    enum class il_return_operator;
+    struct operand_list;
+    struct simple_instruction_list;
+
+
+    struct instruction_list : std::vector<il_instruction>
+    {
+    };
+
+    struct label : std::string
+    {
+    };
+
+
+    struct il_operand : std::variant<constant, variable, enumerated_value>
+    {
+    };
+
+    struct il_operand_list : std::vector<il_operand>
+    {
+    };
+
+    struct il_operand;
+
+
+    struct il_simple_operation
+    {
+        struct operation
+        {
+            forward_ast<il_simple_operator> simple_operator;
+            std::vector<il_operand> operands;
+        };
+
+        struct function
+        {
+            std::string function_name;
+            il_operand_list operand_list;
+        };
+
+        std::variant<operation, function> operation;
+    };
+
+    struct il_formal_funct_call;
+    struct il_expression;
+    struct il_simple_instruction : std::variant<
+         il_simple_operation
+        ,forward_ast<il_expression>
+        ,forward_ast<il_formal_funct_call>>
+    {
+    };
+
+    struct simple_instr_list : std::vector<il_simple_instruction>
+    {
+    };
+
+    struct il_expression
+    {
+        forward_ast<il_expr_operator> operator_;
+        std::vector<il_operand> operands;
+        forward_ast<simple_instruction_list> instruction_list;
+    };
+
+    enum class il_jump_operator;
+    struct il_jump_operation
+    {
+        forward_ast<il_jump_operator> jump_operator;
+        label label;
+    };
+
+
+    enum class il_call_operator;
+    struct il_param_list;
+    struct il_fb_call
+    {
+        struct fb
+        {
+            forward_ast<il_call_operator> call_operator;
+            fb_name name;
+            // boost::optional
+            forward_ast<il_param_list> param_list;
+        };
+
+        std::variant<fb, il_operand_list> fb_call;
+    };
+
+    struct il_param_instruction;
+    struct il_param_list : std::vector<il_param_instruction>
+    {
+    };
+
+    struct il_formal_funct_call
+    {
+        // todo function_name
+        std::string name;
+        il_param_list param_list;
+    };
+
+    struct il_param_assignment;
+    struct il_param_out_assignment;
+    struct il_param_instruction : std::variant<
+        forward_ast<il_param_assignment>,
+        forward_ast<il_param_out_assignment>>
+    {
+    };
+
+
+
+    struct il_assign_operator;
+    struct il_param_assignment
+    {
+        forward_ast<il_assign_operator> assign_operator;
+        using operand = std::variant<il_operand, simple_instr_list>;
+        operand op;
+    };
+
+    struct il_assign_out_operator;
+    struct il_param_out_assignment
+    {
+        forward_ast<il_assign_out_operator> assign_out_operator;
+        variable variable;
+    };
+
+    struct il_instruction
+    {
+        using instruction = std::variant<
+            il_simple_operator
+            ,il_expression
+            ,il_jump_operation
+            ,il_fb_call
+            //,il_formal_funct_call
+            ,il_return_operator
+        >;
+
+        label label;
+        instruction instr;
+    };
+
+#pragma mark - B.2.2 Operators
+
+    /**
+     * append il_expr_operator, or at least ensure both usages
+     */
+    enum class il_simple_operator
+    {
+        LD, LDN, ST, STN, NOT,
+        S, R, S1, R1,
+        CLK, CU, CD,
+        PV, IN, PT
+    };
+
+    enum class il_expr_operator
+    {
+        AND, AND_, OR, XOR, ANDN, _N, ORN, XORN,
+        ADD, SUB, MUL, DIV, MOD,
+        GT, GE, EQ, LT, LE, NE
+    };
+
+    struct il_assign_operator : std::string
+    {
+    };
+
+    struct il_assign_out_operator
+    {
+        bool is_negated;
+        std::string name;
+    };
+
+    enum class il_call_operator
+    {
+        CAL, CALC, CLCN
+    };
+
+    enum class il_return_operator
+    {
+        RET, RETC, RETCN
+    };
+
+    enum class il_jump_operator
+    {
+        JMP, JMPC, JMPCN
+    };
+
+
+#pragma mark - B.3 Language ST (Structured Text)
+
+#pragma mark - B.3.1 Expressions
+
+
+
+
+    struct param_assignment;
+    struct primary_expression_fc
+    {
+        std::string function_name;
+        std::vector<param_assignment> param_assignments;
+    };
+
+    struct expression;
+    struct primary_expression : std::variant<
+         constant
+        ,enumerated_value
+        //,variable
+        ,forward_ast<expression>
+        ,primary_expression_fc>
+    {
+    };
+
+    enum class unary_operator
+    {
+        MINUS, NOT
+    };
+
+    struct unary_expression
+    {
+        unary_operator operator_;
+        forward_ast<primary_expression> expression;
+    };
+
+    struct power_expression
+    {
+        forward_ast<unary_expression> base;
+        forward_ast<unary_expression> exponent;
+    };
+
+    enum class multiply_operator
+    {
+         Multiplication
+        ,Division
+        ,Modulo
+    };
+
+    struct term
+    {
+        struct multiplicant
+        {
+            forward_ast<multiply_operator> operator_;
+            forward_ast<power_expression> expression;
+        };
+
+        forward_ast<power_expression> expression;
+        std::vector<multiplicant> multiplicants;
+    };
+
+    enum class add_operator
+    {
+        PLUS, MINUS
+    };
+
+
+    struct add_expression
+    {
+        forward_ast<term> first_term;
+
+        // TODO: export this structure to other AST types
+        std::vector<add_operator> adds;
+        std::vector<term> terms;
+
+        void add_summand(forward_ast<add_operator> operator_, forward_ast<term> term_)
+        {
+            adds.push_back(operator_);
+            terms.push_back(term_);
+            assert (adds.size() == terms.size());
+        }
+    };
+
+    enum class comparison_operator
+    {
+        LT, GT, LTE, GTE
+    };
+
+    /*
+     * TODO: generalize the following:
+     *
+        std::vector<add_operator> adds;
+        std::vector<term> terms;
+
+        void add_summand(forward_ast<add_operator> operator_, forward_ast<term> term_)
+        {
+            adds.push_back(operator_);
+            terms.push_back(term_);
+            assert (adds.size() == terms.size());
+        }
+     */
+
+
+    struct equ_expression
+    {
+        add_expression summand;
+
+        std::vector<comparison_operator> comparisons;
+        std::vector<add_expression> adds;
+
+        void add_comparison(forward_ast<comparison_operator> operator_, forward_ast<add_expression> add_expr)
+        {
+            comparisons.push_back(operator_);
+            adds.push_back(add_expr);
+            assert (adds.size() == comparisons.size());
+        }
+    };
+
+    struct comparison
+    {
+        equ_expression comparand;
+
+        enum class equal_operator
+        {
+            EQ, NEQ
+        };
+
+        std::vector<equal_operator> comparisons;
+        std::vector<equ_expression> equs;
+
+        void add_comparison(equal_operator operator_, forward_ast<equ_expression> equ_expr)
+        {
+            comparisons.push_back(operator_);
+            equs.push_back(equ_expr);
+            assert (equs.size() == comparisons.size());
+        }
+    };
+
+
+    struct and_expression
+    {
+        comparison first_compare;
+        std::vector<comparison> compares;
+    };
+
+    struct xor_expression
+    {
+        and_expression first_and;
+        std::vector<and_expression> ands;
+    };
+
+    struct expression
+    {
+        xor_expression first_expression;
+        std::vector<xor_expression> xors;
+    };
+
+#pragma mark - B.3.2 Statements
+
+    struct assignment_statement;
+    struct subprogram_control_statement;
+    struct selection_statement;
+    struct iteration_statement;
+
+    struct statement : std::variant<
+         forward_ast<assignment_statement>
+        ,forward_ast<subprogram_control_statement>
+        ,forward_ast<selection_statement>
+        ,forward_ast<iteration_statement>>
+    {
+    };
+
+    struct statement_list : std::vector<statement>
+    {
+    };
+
+
+#pragma mark - B.3.2.1 Assignment statements
+
+    // TODO:
+    struct assignment_statement
+    {
+        //variable var;
+        expression exp;
+    };
+
+#pragma mark - B.3.2.2 Subprogram control statements
+
+    // TODO:
+    struct subprogram_control_statement
+    {
+        //fb_invocation invocation;
+    };
+
+    struct param_assignment
+    {
+        struct assigment
+        {
+            //variable_name name;
+            expression exp;
+        };
+
+        // TODO
+        struct TODO_find_a_name
+        {
+            // variable_name name;
+            // variable var;
+        };
+    };
+
+#pragma mark - B.3.2.3 Selection statements
+
+    struct case_list_element : std::variant<
+         subrange
+        // TODO: ,signed_integer
+        ,enumerated_value>
+    {
+    };
+
+    struct case_list : std::vector<case_list_element>
+    {
+    };
+
+    struct case_element
+    {
+        case_list case_;
+        statement_list statement;
+    };
+
+    struct case_statement
+    {
+        expression condition;
+        std::vector<case_element> elements;
+        statement_list else_statements;
+    };
+
+    struct if_statement
+    {
+        struct if_then
+        {
+            expression condition;
+            statement_list then_statements;
+        };
+
+        struct else_if_then
+        {
+            expression condition;
+            statement_list then_statements;
+        };
+
+        if_then if_;
+        std::vector<else_if_then> else_if;
+        statement_list else_;
+    };
+
+    struct selection_statement : std::variant<if_statement, case_statement>
+    {
+    };
+
+#pragma mark - B.3.2.4 Iteration statements
+
+    struct control_variable : identifier
+    {
+    };
+
+    struct for_list
+    {
+        expression from;
+        expression to;
+        expression by;
+    };
+
+    struct for_statement
+    {
+        control_variable control;
+        for_list list;
+        statement_list statements;
+    };
+
+    struct while_statement
+    {
+        expression while_;
+        statement_list do_;
+    };
+
+    struct repeat_statement
+    {
+        statement_list repeat_statements;
+        expression until_expression;
+    };
+
+    struct exit_statement
+    {
+    };
+
+    struct iteration_statement : std::variant<
+         for_statement
+        ,while_statement
+        ,repeat_statement
+        ,exit_statement>
+    {
+    };
 
 }}}

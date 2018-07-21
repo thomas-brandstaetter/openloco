@@ -1185,7 +1185,7 @@ fnl__names
         $1.push_back($3);
         std::swap($$, $1);
     }
-    |
+    | { }
     ;
 
 fb_name

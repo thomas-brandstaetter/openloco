@@ -305,19 +305,19 @@ namespace ast {
 
     struct enumerated_value
     {
+        using list = std::vector<enumerated_value>;
+
         std::string type_name;
         std::string value;
     };
 
-    using enumerated_specification = 
-        std::variant<
-            std::vector<enumerated_value>,
-            std::string>;
+    struct enumerated_specification : std::variant<enumerated_value::list, std::string>
+    {
+        using base_type = std::variant<enumerated_value::list, std::string>;
+        using base_type::base_type
+    };
 
-    struct enumerated_type_declaration : type_declaration_base<
-        std::string,
-        enumerated_specification,
-        enumerated_value>
+    struct enumerated_type_declaration : type_declaration_base<std::string, enumerated_specification, enumerated_value>
     {
     };
 
@@ -334,11 +334,18 @@ namespace ast {
 
 
     // -------------------------------
-    using single_element_type_declaration = 
-        std::variant<
+    struct single_element_type_declaration : std::variant<
+            simple_type_declaration,
+            subrange_type_declaration,
+            enumerated_type_declaration>
+    {
+        using base_type = std::variant<
             simple_type_declaration,
             subrange_type_declaration,
             enumerated_type_declaration>;
+
+        using base_type::base_type;
+    };
 
     // array -------------------------
 
@@ -350,12 +357,20 @@ namespace ast {
     struct structure_initialization;
     struct array_initialization;
 
-    using array_initial_element =
-        std::variant<
+    struct array_initial_element : public std::variant<
             constant,
             enumerated_value,
             forward_ast<structure_initialization>,
-            forward_ast<array_initialization>>;
+            forward_ast<array_initialization>>
+    {
+        using base_type = std::variant<
+            constant,
+            enumerated_value,
+            forward_ast<structure_initialization>,
+            forward_ast<array_initialization>;
+
+        using base_type::base_type;
+    };
 
 
     struct array_initial_elements {
@@ -388,7 +403,7 @@ namespace ast {
                 forward_ast<structure_initialization>>;
 
         value init_value;
-        std::string name;
+        identifier name;
     };
 
     struct structure_initialization
@@ -401,13 +416,13 @@ namespace ast {
 
     struct initialized_structure
     {
-        std::string type_name;
+        identifier type_name;
         structure_initialization initialization;
     };
 
     struct structure_element_declaration
     {
-        std::string element_name;
+        identifier element_name;
 
         using spec_init =
             std::variant<
@@ -431,12 +446,15 @@ namespace ast {
 
     struct structure_type_declaration
     {
-        std::string type_name;
+        identifier type_name;
         structure_specification specification;
     };
 
     struct type_declaration
     {
+        using list = std::vector<type_declaration>
+        using iterator = list::iterator;
+
         using declaration =
             std::variant<
                 single_element_type_declaration,
@@ -451,14 +469,15 @@ namespace ast {
     // -------------------------------
     struct data_type_declaration
     {
-        std::vector<type_declaration> declarations;
+        type_declaration::list declarations;
+
     };
 
     /**
      * The name is program. This typedef is used as long as the grammar is not
      * completed and will change over time.
      */
-    using temporary_root = std::vector<type_declaration>;
+    using temporary_root = type_declaration::list;
 
     using root = temporary_root;
 
@@ -806,8 +825,8 @@ namespace ast {
 
     struct power_expression
     {
-        forward_ast<unary_expression> base;
-        forward_ast<unary_expression> exponent;
+        unary_expression base;
+        unary_expression exponent;
     };
 
     enum class multiply_operator
@@ -821,8 +840,8 @@ namespace ast {
     {
         struct multiplicant
         {
-            forward_ast<multiply_operator> operator_;
-            forward_ast<power_expression> expression;
+            multiply_operator operator_;
+            power_expression expression;
         };
 
         forward_ast<power_expression> expression;
@@ -837,9 +856,8 @@ namespace ast {
 
     struct add_expression
     {
-        forward_ast<term> first_term;
+        term first_term;
 
-        // TODO: export this structure to other AST types
         std::vector<add_operator> adds;
         std::vector<term> terms;
 

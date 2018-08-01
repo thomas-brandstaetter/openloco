@@ -171,7 +171,7 @@
 
 %token SCANNER_ERROR
 
-%token <std::string>                            IDENTIFIER
+%token <ast::identifier>                        IDENTIFIER
 
     // B.1.2 Constants
 
@@ -181,11 +181,11 @@
 %type  <ast::numeric_literal>                   numeric_literal
 %type  <ast::integer_literal>                   integer_literal
 %type  <ast::value_wrapper<long>>               integer_literal_value
-%type  <long>               signed_integer
-%token <long>                                   INTEGER
-%token <long>                                   BINARY_INTEGER
-%token <long>                                   OCTAL_INTEGER
-%token <long>                                   HEX_INTEGER
+%type  <ast::signed_integer>                    signed_integer
+%token <ast::integer>                           INTEGER
+%token <ast::binary_integer>                    BINARY_INTEGER
+%token <ast::octal_integer>                     OCTAL_INTEGER
+%token <ast::hex_integer>                       HEX_INTEGER
 %type  <ast::value_wrapper<double>>             real_literal
 %type  <ast::value_wrapper<long>>               exponent
 %type  <ast::value_wrapper<long>>               bit_string_literal
@@ -194,11 +194,11 @@
 %type  <ast::value_wrapper<bool>>               boolean_literal_value
 
     // B.1.2.2 Character strings
-%token <std::string>        SINGLE_BYTE_CHARACTER_STRING
-%token <std::string>        DOUBLE_BYTE_CHARACTER_STRING
-%type  <std::string>        character_string
+%token <ast::single_byte_character_string>      SINGLE_BYTE_CHARACTER_STRING
+%token <ast::double_byte_character_string>      DOUBLE_BYTE_CHARACTER_STRING
+%type  <ast::character_string>                  character_string
 
-%token <double>         MANTISSA
+%token <double>                                 MANTISSA
 
     // B.1.2.3 Time literals
 %type  <ast::time_literal>  time_literal

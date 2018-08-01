@@ -85,7 +85,7 @@ namespace lang {
         void add_token(std::string token);
 
         void set_root(ast::root root)   { _ast_root = root; }
-        ast::root& get_root() const     { return _ast_root; }
+        ast::root& get_root()           { return _ast_root; }
         /** @} */
 
         friend class parser;

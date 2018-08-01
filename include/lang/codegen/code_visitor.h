@@ -16,7 +16,7 @@ namespace codegen {
 
     class code_visitor
     {
-        using namespace openloco::lang::ast;
+        namespace ast = openloco::lang::ast;
 
         /** @addtogroup Object lifecycle */
         /** @{ */

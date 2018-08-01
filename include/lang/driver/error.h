@@ -82,10 +82,10 @@ namespace lang {
 
     public:
         static error make_error(error_type type, class file& file, location loc);
-        static error make_custom_error(std::string message, class file& file, location loc);
+        static error make_custom_error(std::string &message, class file& file, location loc);
+        static error make_scanner_error(std::string &message, class file& file, location loc);
 
         void print(std::ostream& is = std::cerr);
-
 
 
         /** \addtogroup Object lifecycle */

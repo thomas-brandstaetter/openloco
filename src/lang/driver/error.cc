@@ -64,7 +64,13 @@ namespace lang {
     }
 
     error
-    error::make_custom_error(std::string message, class file& file, location loc)
+    error::make_scanner_error(std::string &message, class file& file, location loc)
+    {
+        return make_custom_error(message, file, loc);
+    };
+
+    error
+    error::make_custom_error(std::string &message, class file& file, location loc)
     {
         error error {file, loc};
         error_type type = error::error_type::E_custom;

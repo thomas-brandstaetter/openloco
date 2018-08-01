@@ -89,6 +89,8 @@ namespace ast {
 
     struct identifier : std::string
     {
+        using base_type = std::string;
+        using base_type::base_type;
     };
 
 #pragma mark - B.1.2.1 Numeric literals
@@ -314,7 +316,7 @@ namespace ast {
     struct enumerated_specification : std::variant<enumerated_value::list, std::string>
     {
         using base_type = std::variant<enumerated_value::list, std::string>;
-        using base_type::base_type
+        using base_type::base_type;
     };
 
     struct enumerated_type_declaration : type_declaration_base<std::string, enumerated_specification, enumerated_value>
@@ -367,7 +369,7 @@ namespace ast {
             constant,
             enumerated_value,
             forward_ast<structure_initialization>,
-            forward_ast<array_initialization>;
+            forward_ast<array_initialization>>;
 
         using base_type::base_type;
     };
@@ -452,7 +454,7 @@ namespace ast {
 
     struct type_declaration
     {
-        using list = std::vector<type_declaration>
+        using list = std::vector<type_declaration>;
         using iterator = list::iterator;
 
         using declaration =
@@ -616,19 +618,22 @@ namespace ast {
 
     struct label : std::string
     {
+        using base_type = std::string;
+        using base_type::base_type;
     };
 
 
     struct il_operand : std::variant<constant, variable, enumerated_value>
     {
+        using base_type = std::variant<constant, variable, enumerated_value>;
+        using base_type::base_type;
     };
 
     struct il_operand_list : std::vector<il_operand>
     {
+        using base_type = std::vector<il_operand>;
+        using base_type::base_type;
     };
-
-    struct il_operand;
-
 
     struct il_simple_operation
     {
@@ -640,7 +645,7 @@ namespace ast {
 
         struct function
         {
-            std::string function_name;
+            identifier function_name;
             il_operand_list operand_list;
         };
 
@@ -654,10 +659,14 @@ namespace ast {
         ,forward_ast<il_expression>
         ,forward_ast<il_formal_funct_call>>
     {
+        using base_type = std::variant<il_simple_operation, forward_ast<il_expression>, forward_ast<il_formal_funct_call>>;
+        using base_type::base_type;
     };
 
     struct simple_instr_list : std::vector<il_simple_instruction>
     {
+        using base_type = std::vector<il_simple_instruction>;
+        using base_type::base_type;
     };
 
     struct il_expression
@@ -687,12 +696,14 @@ namespace ast {
             forward_ast<il_param_list> param_list;
         };
 
-        std::variant<fb, il_operand_list> fb_call;
+        std::variant<fb, il_operand_list> TODO_name;
     };
 
     struct il_param_instruction;
     struct il_param_list : std::vector<il_param_instruction>
     {
+        using base_type = std::vector<il_param_instruction>;
+        using base_type::base_type;
     };
 
     struct il_formal_funct_call
@@ -764,6 +775,8 @@ namespace ast {
 
     struct il_assign_operator : std::string
     {
+        using base_type = std::string;
+        using base_type::base_type;
     };
 
     struct il_assign_out_operator
@@ -810,6 +823,8 @@ namespace ast {
         ,forward_ast<expression>
         ,primary_expression_fc>
     {
+        using base_type = std::variant<constant, enumerated_value, forward_ast<expression>, primary_expression_fc>;
+        using base_type::base_type;
     };
 
     enum class unary_operator
@@ -880,7 +895,7 @@ namespace ast {
         std::vector<add_operator> adds;
         std::vector<term> terms;
 
-        void add_summand(forward_ast<add_operator> operator_, forward_ast<term> term_)
+        void add_summand(add_operator operator_, term term_)
         {
             adds.push_back(operator_);
             terms.push_back(term_);
@@ -896,7 +911,7 @@ namespace ast {
         std::vector<comparison_operator> comparisons;
         std::vector<add_expression> adds;
 
-        void add_comparison(forward_ast<comparison_operator> operator_, forward_ast<add_expression> add_expr)
+        void add_comparison(comparison_operator operator_, add_expression add_expr)
         {
             comparisons.push_back(operator_);
             adds.push_back(add_expr);
@@ -956,10 +971,18 @@ namespace ast {
         ,forward_ast<selection_statement>
         ,forward_ast<iteration_statement>>
     {
+        using base_type = std::variant<
+            forward_ast<assignment_statement>
+            ,forward_ast<subprogram_control_statement>
+            ,forward_ast<selection_statement>
+            ,forward_ast<iteration_statement>>;
+        using base_type::base_type;
     };
 
     struct statement_list : std::vector<statement>
     {
+        using base_type = std::vector<statement>;
+        using base_type::base_type;
     };
 
 
@@ -1003,10 +1026,14 @@ namespace ast {
         // TODO: ,signed_integer
         ,enumerated_value>
     {
+        using base_type = std::variant<subrange, enumerated_value>;
+        using base_type::base_type;
     };
 
     struct case_list : std::vector<case_list_element>
     {
+        using base_type = std::vector<case_list_element>;
+        using base_type::base_type;
     };
 
     struct case_element
@@ -1043,12 +1070,16 @@ namespace ast {
 
     struct selection_statement : std::variant<if_statement, case_statement>
     {
+        using base_type = std::variant<if_statement, case_statement>;
+        using base_type::base_type;
     };
 
 #pragma mark - B.3.2.4 Iteration statements
 
     struct control_variable : identifier
     {
+        using base_type = identifier;
+        using base_type::base_type;
     };
 
     struct for_list
@@ -1087,6 +1118,8 @@ namespace ast {
         ,repeat_statement
         ,exit_statement>
     {
+        using base_type = std::variant<for_statement, while_statement, repeat_statement ,exit_statement>;
+        using base_type::base_type;
     };
 
 }}}

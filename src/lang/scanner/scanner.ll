@@ -249,7 +249,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
     /* B.1.1 Letters, digits and identifiers */
 
 ({LETTER})(({LETTER}|{DIGIT}|_))+   {
-        std::string value(yytext, static_cast<size_t>(yyleng));
+        std::string stringytext, static_cast<size_t>(yyleng));
+        openloco::ast::identifier value { string };
         return parser::make_IDENTIFIER(value, loc);
     }
 
@@ -261,7 +262,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         /* INTEGER */
         std::string str_value(yytext, static_cast<size_t>(yyleng));
         cleanup_number(0, str_value);
-        long value = strtol( str_value.c_str(), NULL, 10);
+        long raw_value = strtol( str_value.c_str(), NULL, 10);
+        openloco::ast::integer value { raw_value }
 
         return parser::make_INTEGER(value, loc);
     }
@@ -270,7 +272,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         std::string str_value(yytext, yyleng);
         cleanup_number(2, str_value);
-        long value = strtol( str_value.c_str(), NULL, 2);
+        long raw_value = strtol( str_value.c_str(), NULL, 2);
+        openloco::ast::binary_integer value { raw_value };
 
         return parser::make_BINARY_INTEGER(value, loc);
     }
@@ -279,7 +282,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         std::string str_value(yytext, yyleng);
         cleanup_number(2, str_value);
-        long value = strtol( str_value.c_str(), NULL, 8);
+        long raw_value = strtol( str_value.c_str(), NULL, 8);
+        openloco::ast::octal_integer value { raw_value };
 
         return parser::make_OCTAL_INTEGER(value, loc);
     }
@@ -288,7 +292,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         std::string str_value(yytext, yyleng);
         cleanup_number(3, str_value);
-        long value = strtol( str_value.c_str(), NULL, 16);
+        long raw_value = strtol( str_value.c_str(), NULL, 16);
+        openloco::ast::hex_integer value { raw_value };
 
         return parser::make_HEX_INTEGER(value, loc);
     }
@@ -297,7 +302,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         std::string str_value(yytext, yyleng);
         cleanup_number(0, str_value);
-        double value = strtod( str_value.c_str(), NULL);
+        double raw_value = strtod( str_value.c_str(), NULL);
+        openloco::ast::fixed_point value { raw_value };
 
         return parser::make_FIXED_POINT(value, loc);
     }
@@ -308,7 +314,9 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         sbcs_empty = false;
         std::string str_value { yytext };
-        return parser::make_SINGLE_BYTE_CHARACTER_STRING(str_value, loc);
+        openloco::ast::single_byte_character_string value { str_value };
+
+        return parser::make_SINGLE_BYTE_CHARACTER_STRING(value, loc);
     }
 
 <SB_STRING>' {
@@ -319,7 +327,9 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
     std::string str_value { cstr_value };
 
     sbcs_empty = true;
-    return parser::make_SINGLE_BYTE_CHARACTER_STRING(str_value, loc);
+    openloco::ast::sinbgle_byte_character_string value { str_value };
+
+    return parser::make_SINGLE_BYTE_CHARACTER_STRING(value, loc);
 }
 
 \" { BEGIN(DB_STRING); }
@@ -328,7 +338,9 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         dbcs_empty = false;
         std::string str_value { yytext };
-        return parser::make_DOUBLE_BYTE_CHARACTER_STRING(str_value, loc);
+        openloco::ast::double_byte_character_string value { str_value };
+
+        return parser::make_DOUBLE_BYTE_CHARACTER_STRING(value, loc);
     }
 
 <DB_STRING>\" {
@@ -364,7 +376,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 
 void
-openloco::lang::scanner::set_scan_eol(bool scan_eol) {
+openloco::lang::scanner::set_scan_eol(bool scan_eol)
+{
     _scan_eol = scan_eol;
 }
 
@@ -378,27 +391,30 @@ openloco::lang::scanner::yyerror(const char* message, location loc)
 }
 
 void
-openloco::lang::scanner::cleanup_number(const unsigned long erease_end, std::string& str_value) const {
-
-    if (erease_end > 1)
-        str_value.erase(0,erease_end);
+openloco::lang::scanner::cleanup_number(const unsigned long prefix_length, std::string& str_value) const
+{
+    if (prefix_length >= 1)
+        str_value.erase(0,prefix_length);
     str_value.erase(std::remove(str_value.begin(), str_value.end(), '_'), str_value.end());
 }
 
 void
-openloco::lang::scanner::reset(std::istream* input_file) {
+openloco::lang::scanner::reset(std::istream* input_file)
+{
     yyrestart(input_file);
     reset_location();
 }
 
 void
-openloco::lang::scanner::reset(std::istream& input_file) {
+openloco::lang::scanner::reset(std::istream& input_file)
+{
     yyrestart(input_file);
     reset_location();
 }
 
 void
-openloco::lang::scanner::reset_location() {
+openloco::lang::scanner::reset_location()
+{
     loc.begin.column = 1;
     loc.end.column = 1;
     loc.begin.line = 1;

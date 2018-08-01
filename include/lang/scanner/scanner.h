@@ -45,25 +45,23 @@ namespace lang {
         /** \addtogroup Scanner control */
         /** @{ */
         void reset_location();
-        /** @{ */
+        /** @} */
 
 
         /** \addtogroup Helper */
         /** @{ */
 
         /**
-         * prepare IEC numeric constants for converting from string to numeric type
+         * prepare IEC numeric constants for converting from string to a numeric type
          *
          * @example
          *      (2, "2#1101_0010") --> 11010010
          */
-        void cleanup_number(const unsigned long erease_end, std::string& str_value) const  ;
+        void cleanup_number(const unsigned long prefix_length, std::string& str_value) const  ;
         /** @} */
 
 
-
         driver &_driver;
-
         bool _scan_eol;
     };
 }}

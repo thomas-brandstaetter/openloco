@@ -29,7 +29,6 @@ namespace ast {
     template<typename FT>
     struct value_wrapper
     {
-
         value_wrapper() : value() {}
         value_wrapper(FT& rhs) : value(rhs) {}
         value_wrapper(const FT& rhs) : value(rhs) {}
@@ -39,6 +38,21 @@ namespace ast {
         FT value;
 
         operator FT () { return value; }
+    };
+
+
+    /**
+     *
+     * @tparam VT The variant types
+     */
+    template<typename ...VT>
+    struct variant : public std::variant<VT...>
+    {
+        typedef std::variant<VT...> base;
+        using base::base;
+        using base::operator=;
+
+        base value;
     };
 
 
@@ -73,49 +87,110 @@ namespace ast {
         VT value;
     };
 
-
 #pragma mark - B.1 Common elements
 #pragma mark - B.1.1 Letters, digits and identifiers
 
     struct identifier : std::string
     {
-        using base_type = std::string;
-        using base_type::base_type;
+        using base = std::string;
+        using base::base;
     };
 
 #pragma mark - B.1.2.1 Numeric literals
 
-    // TODO: implement 1.2 Constants types
 
-    struct integer_literal : value_wrapper<long>
+    struct integer : value_wrapper<long>
     {
     };
 
-    struct _literal : value_wrapper<long>
+    struct signed_integer : value_wrapper<long>
     {
+        signed_integer& operator=(const integer& rhs)
+        {
+            value = rhs.value;
+            return *this;
+        }
     };
 
 
-    struct numeric_literal : value_wrapper<long>
+    struct binary_integer : value_wrapper<long>
     {
+    };
+
+    struct octal_integer : value_wrapper<long>
+    {
+    };
+
+    struct hex_integer : value_wrapper<long>
+    {
+    };
+
+    struct boolean_literal : value_wrapper<bool>
+    {
+    };
+
+    struct bit_string_literal : variant<integer, binary_integer, octal_integer, hex_integer>
+    {
+        using base = variant<integer, binary_integer, octal_integer, hex_integer>;
+        using base::base;
+    };
+
+    struct integer_literal : variant<signed_integer, integer, binary_integer, octal_integer, hex_integer>
+    {
+        using base = variant<signed_integer, integer, binary_integer, octal_integer, hex_integer>;
+        using base::base;
+
+        enum class integer_type_name;
+        integer_type_name type_name;
+
+
+    };
+
+    struct real_literal : value_wrapper<double>
+    {
+    };
+
+    struct numeric_literal : variant<integer_literal, real_literal>
+    {
+        using base = variant<integer_literal, real_literal>;
+        using base::base;
     };
 
 
 
-#pragma mark B.1.2.3.1 Duration
+#pragma mark - B.1.2.2 Character Strings
+
+    struct single_byte_character_string : value_wrapper<std::string>
+    {
+        using base = value_wrapper<std::string>;
+        using base::base;
+    };
+
+    struct double_byte_character_string : value_wrapper<std::string>
+    {
+        using base = value_wrapper<std::string>;
+        using base::base;
+    };
+
+    struct character_string : variant<single_byte_character_string, double_byte_character_string>
+    {
+        using base = variant<single_byte_character_string, double_byte_character_string>;
+        using base::base;
+    };
+
+#pragma mark - B.1.2.3 Time literals
+
+
+#pragma mark - B.1.2.3.1 Duration
 
     struct days : value_wrapper<double>
     {
+        using base = value_wrapper<double>;
+        using base::base;
     };
 
     struct interval : ast::days
     {
-        interval operator-() const
-        {
-            interval i;
-            i.value = -value;
-            return i;
-        }
     };
 
     struct duration : ast::interval
@@ -125,6 +200,10 @@ namespace ast {
             value = i.value;
             return *this;
         }
+    };
+
+    struct fixed_point : value_wrapper<double>
+    {
     };
 
 #pragma mark B.1.2.3.2 Time of day and date
@@ -160,18 +239,17 @@ namespace ast {
         daytime time;
     };
 
-    using time_literal =
-        std::variant<duration, time_of_day, date_literal, date_and_time>;
-
-
+    struct time_literal : std::variant<duration, time_of_day, date_literal, date_and_time>
+    {
+    };
 
     using constant =
         std::variant<
             numeric_literal,
-            std::string,
             time_literal,
-            long,
-            ast::value_wrapper<bool> >;
+            bit_string_literal,
+            boolean_literal,
+            ast::character_string>;
 
 
 
@@ -320,7 +398,7 @@ namespace ast {
     {
         ast::elementary_type_name type_name;
         unsigned long size;
-        std::string value;
+        ast::character_string value;
     };
 
 
@@ -457,7 +535,7 @@ namespace ast {
         declaration decl;
         std::string type_name;
     };
-    
+
     // -------------------------------
     struct data_type_declaration
     {
@@ -489,23 +567,26 @@ namespace ast {
         variable_name,
         forward_ast<multi_element_variable>>;
 
-    using variable = std::variant<
-        forward_ast<direct_variable>,
-        symbolic_variable>;
+    struct variable : std::variant<forward_ast<direct_variable>, symbolic_variable>
+    {
+    };
 
 
 #pragma mark - B.1.4.1 Directly represented variables
 
 
-    enum class size_prefix {
+    enum class size_prefix
+    {
         X, B, W, D, L
     };
 
-    enum class location_prefix {
+    enum class location_prefix
+    {
         I, Q, M
     };
 
-    struct direct_variable {
+    struct direct_variable
+    {
         using positions = std::vector<long>;
 
         location_prefix location;
@@ -670,7 +751,7 @@ namespace ast {
     struct il_jump_operation
     {
         forward_ast<il_jump_operator> jump_operator;
-        label label;
+        struct label label;
     };
 
 
@@ -711,8 +792,6 @@ namespace ast {
     {
     };
 
-
-
     struct il_assign_operator;
     struct il_param_assignment
     {
@@ -725,7 +804,7 @@ namespace ast {
     struct il_param_out_assignment
     {
         forward_ast<il_assign_out_operator> assign_out_operator;
-        variable variable;
+        struct variable variable;
     };
 
     struct il_instruction
@@ -739,7 +818,7 @@ namespace ast {
             ,il_return_operator
         >;
 
-        label label;
+        struct label label;
         instruction instr;
     };
 

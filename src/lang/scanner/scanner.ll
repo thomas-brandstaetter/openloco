@@ -249,8 +249,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
     /* B.1.1 Letters, digits and identifiers */
 
 ({LETTER})(({LETTER}|{DIGIT}|_))+   {
-        std::string stringytext, static_cast<size_t>(yyleng));
-        openloco::ast::identifier value { string };
+        std::string string { yytext, static_cast<size_t>(yyleng) };
+        ast::identifier value { string };
         return parser::make_IDENTIFIER(value, loc);
     }
 
@@ -263,7 +263,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         std::string str_value(yytext, static_cast<size_t>(yyleng));
         cleanup_number(0, str_value);
         long raw_value = strtol( str_value.c_str(), NULL, 10);
-        openloco::ast::integer value { raw_value }
+        ast::integer value;
+        value.value = raw_value;
 
         return parser::make_INTEGER(value, loc);
     }
@@ -273,7 +274,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         std::string str_value(yytext, yyleng);
         cleanup_number(2, str_value);
         long raw_value = strtol( str_value.c_str(), NULL, 2);
-        openloco::ast::binary_integer value { raw_value };
+        ast::binary_integer value;
+        value.value = raw_value;
 
         return parser::make_BINARY_INTEGER(value, loc);
     }
@@ -283,7 +285,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         std::string str_value(yytext, yyleng);
         cleanup_number(2, str_value);
         long raw_value = strtol( str_value.c_str(), NULL, 8);
-        openloco::ast::octal_integer value { raw_value };
+        ast::octal_integer value;
+        value.value = raw_value;
 
         return parser::make_OCTAL_INTEGER(value, loc);
     }
@@ -293,7 +296,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         std::string str_value(yytext, yyleng);
         cleanup_number(3, str_value);
         long raw_value = strtol( str_value.c_str(), NULL, 16);
-        openloco::ast::hex_integer value { raw_value };
+        ast::hex_integer value;
+        value.value = raw_value;
 
         return parser::make_HEX_INTEGER(value, loc);
     }
@@ -303,7 +307,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
         std::string str_value(yytext, yyleng);
         cleanup_number(0, str_value);
         double raw_value = strtod( str_value.c_str(), NULL);
-        openloco::ast::fixed_point value { raw_value };
+        ast::fixed_point value;
+        value.value = raw_value;
 
         return parser::make_FIXED_POINT(value, loc);
     }
@@ -314,22 +319,14 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         sbcs_empty = false;
         std::string str_value { yytext };
-        openloco::ast::single_byte_character_string value { str_value };
+        ast::single_byte_character_string value;
+        value.value = str_value;
 
         return parser::make_SINGLE_BYTE_CHARACTER_STRING(value, loc);
     }
 
 <SB_STRING>' {
-
     BEGIN(0);
-
-    const char *cstr_value = (sbcs_empty) ? "" : yytext;
-    std::string str_value { cstr_value };
-
-    sbcs_empty = true;
-    openloco::ast::sinbgle_byte_character_string value { str_value };
-
-    return parser::make_SINGLE_BYTE_CHARACTER_STRING(value, loc);
 }
 
 \" { BEGIN(DB_STRING); }
@@ -338,20 +335,13 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
         dbcs_empty = false;
         std::string str_value { yytext };
-        openloco::ast::double_byte_character_string value { str_value };
+        ast::double_byte_character_string value;
+        value.value = str_value;
 
         return parser::make_DOUBLE_BYTE_CHARACTER_STRING(value, loc);
     }
 
-<DB_STRING>\" {
-    BEGIN(0);
-
-    const char *cstr_value = (dbcs_empty) ? "" : yytext;
-    std::string str_value { cstr_value };
-
-    dbcs_empty = true;
-    return parser::make_DOUBLE_BYTE_CHARACTER_STRING(str_value, loc);
-}
+<DB_STRING>\" { BEGIN(0); }
 
 
 
@@ -420,4 +410,3 @@ openloco::lang::scanner::reset_location()
     loc.begin.line = 1;
     loc.end.line = 1;
 }
-

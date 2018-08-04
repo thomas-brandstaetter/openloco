@@ -180,18 +180,18 @@
     // B.1.2.1 Numeric literals
 %type  <ast::numeric_literal>                   numeric_literal
 %type  <ast::integer_literal>                   integer_literal
-%type  <ast::value_wrapper<long>>               integer_literal_value
+%type  <ast::integer_literal>                   integer_literal_value
 %type  <ast::signed_integer>                    signed_integer
 %token <ast::integer>                           INTEGER
 %token <ast::binary_integer>                    BINARY_INTEGER
 %token <ast::octal_integer>                     OCTAL_INTEGER
 %token <ast::hex_integer>                       HEX_INTEGER
-%type  <ast::value_wrapper<double>>             real_literal
+%type  <ast::real_literal>                      real_literal
 %type  <ast::value_wrapper<long>>               exponent
-%type  <ast::value_wrapper<long>>               bit_string_literal
-%type  <ast::value_wrapper<long>>               bit_string_literal_value
-%type  <ast::value_wrapper<bool>>               boolean_literal
-%type  <ast::value_wrapper<bool>>               boolean_literal_value
+%type  <ast::bit_string_literal>                bit_string_literal
+%type  <ast::bit_string_literal>                bit_string_literal_value
+%type  <ast::boolean_literal>                   boolean_literal
+%type  <ast::boolean_literal>                   boolean_literal_value
 
     // B.1.2.2 Character strings
 %token <ast::single_byte_character_string>      SINGLE_BYTE_CHARACTER_STRING
@@ -302,11 +302,11 @@
 %type  <ast::structure_declaration>         structure_declaration
 %type  <ast::structure_declaration::list>   sd__declarations
 
-%type  <std::string>                        structure_element_name
+%type  <ast::identifier>                    structure_element_name
 
 %type  <ast::string_type_declaration>       string_type_declaration
 %type  <long>                               std__size
-%type  <std::string>                        std__init
+%type  <ast::character_string>              std__init
 
 
 
@@ -389,7 +389,7 @@ constant
     : numeric_literal           { $$ = $1; }
     | character_string          { $$ = $1; }
     | time_literal              { $$ = $1; }
-    | bit_string_literal        { $$ = $1.value; }
+    | bit_string_literal        { $$ = $1; }
     | boolean_literal           { $$ = $1; }
     ;
 
@@ -397,26 +397,26 @@ constant
     // B.1.2.1 Numeric literals
     // -----------------------------------------------------------------------
 numeric_literal
-    : integer_literal   { $$.value = $1.value; }
-    | real_literal      { $$.value = $1.value; }
+    : integer_literal   { $$ = $1; }
+    | real_literal      { $$ = $1; }
     ;
 
 integer_literal
-    : integer_type_name integer_literal_value   { $$.value = $2.value; }
-    | integer_literal_value                     { $$.value = $1.value; }
+    : integer_type_name integer_literal_value   { $$ = $2; }
+    | integer_literal_value                     { $$ = $1; }
     ;
 
 integer_literal_value
     : signed_integer    { $$ = $1; }
-    | INTEGER           { $$.value = $1; }
-    | BINARY_INTEGER    { $$.value = $1; }
-    | OCTAL_INTEGER     { $$.value = $1; }
-    | HEX_INTEGER       { $$.value = $1; }
+    | INTEGER           { $$ = $1; }
+    | BINARY_INTEGER    { $$ = $1; }
+    | OCTAL_INTEGER     { $$ = $1; }
+    | HEX_INTEGER       { $$ = $1; }
     ;
 
 signed_integer
     : PLUS INTEGER      { $$ = $2; }
-    | MINUS INTEGER     { $$ = -($2); }
+    | MINUS INTEGER     { $2.value *= -1; $$ = $2; }
     ;
 
 real_literal
@@ -428,7 +428,7 @@ real_literal
 
 exponent
     : E signed_integer  { $$.value = $2; }
-    |                   { $$.value = 1; }
+    |                   { $$.value = 1l; }
     ;
 
 bit_string_literal
@@ -436,10 +436,10 @@ bit_string_literal
     ;
 
 bit_string_literal_value
-    : INTEGER           { $$.value = $1; }
-    | BINARY_INTEGER    { $$.value = $1; }
-    | OCTAL_INTEGER     { $$.value = $1; }
-    | HEX_INTEGER       { $$.value = $1; }
+    : INTEGER           { $$ = $1; }
+    | BINARY_INTEGER    { $$ = $1; }
+    | OCTAL_INTEGER     { $$ = $1; }
+    | HEX_INTEGER       { $$ = $1; }
     ;
 
 
@@ -625,7 +625,7 @@ numeric_type_name
 
 integer_type_name
     : signed_integer_type_name      { $$ = static_cast<ast::integer_type_name>($1); }
-    | unsigned_integer_type_name    { $$ = static_cast<ast::integer_type_name>($1); }
+    | unsigned_integer_type_name    { $$ = static_cast<ast::integer_type_name>($1); }       // TODO: transport type information upwards via | type_name operation
     ;
 
 signed_integer_type_name
@@ -716,7 +716,6 @@ type_declaration
         $$.type_name = $1;
         $$.decl = $3;
     }
-
 
 t__declaration
     : single_element_type_declaration   { $$ = $1; }
@@ -853,7 +852,9 @@ as__subranges
         $1.push_back($3);
         std::swap($$, $1);
     }
-    |
+    | subrange {
+        $$.push_back($1);
+    }
     ;
 
 array_initialization
@@ -981,7 +982,7 @@ std__size
 
 std__init
     : DEF character_string          { $$ = $2; }
-    |                               { $$ = ""; }
+    |                               { ast::character_string cs; $$ = cs; }
     ;
 
     // -----------------------------------------------------------------------

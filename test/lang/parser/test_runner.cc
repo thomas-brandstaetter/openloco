@@ -52,9 +52,9 @@ void
 synopsis() {
     std::cerr
         << "SYNOPSIS\n"
-        << program_name << " <filename>.<desired-result>\n"
+        << program_name << " <filename>.<expected-result>\n"
         << "\n"
-        << "desired-result: return code the program ends with" << std::endl;
+        << "expected-result: return code the program should end with" << std::endl;
 }
 
 

@@ -31,15 +31,6 @@ TEST_F(identifier_token_test, match_identifier_w_underscore) {
     ASSERT_EQ(result.token(), parser::token::IDENTIFIER);
 }
 
-TEST_F(identifier_token_test, dont_match_identifier_w_underscore_front) {
-
-    input << "_identifier";
-
-    scanner.reset(input);
-    parser::symbol_type result = scanner.yylex(driver);
-    ASSERT_NE(result.token(), parser::token::IDENTIFIER);
-}
-
 TEST_F(identifier_token_test, match_identifier_w_underscore_end) {
 
     input << "identifier_";
@@ -66,9 +57,6 @@ TEST_F(identifier_token_test, reject_identifier_begin_w_number) {
     parser::symbol_type result = scanner.yylex(driver);
     ASSERT_NE(result.token(), parser::token::IDENTIFIER);
 }
-
-
-
 
 TEST_F(identifier_value_test, match_values) {
 

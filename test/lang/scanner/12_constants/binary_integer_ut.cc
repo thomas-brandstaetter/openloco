@@ -8,7 +8,7 @@
 
 class binary_integer_test : public abstract_scanner_ut { };
 
-TEST_F(binary_integer_test, match_555) {
+TEST_F(binary_integer_test, match_integer) {
     input << "2#111";
 
     scanner.yyrestart(input);
@@ -18,7 +18,7 @@ TEST_F(binary_integer_test, match_555) {
     ASSERT_EQ(7, result_value);
 }
 
-TEST_F(binary_integer_test, match_555_w_underscore_position_front) {
+TEST_F(binary_integer_test, match_integer_w_underscore) {
     input << "2#1_11";
 
     scanner.yyrestart(input);
@@ -28,7 +28,7 @@ TEST_F(binary_integer_test, match_555_w_underscore_position_front) {
     ASSERT_EQ(7, result_value);
 }
 
-TEST_F(binary_integer_test, match_555_w_underscore_position_middle) {
+TEST_F(binary_integer_test, match_integer_w_underscore_before_end) {
     input << "2#11_1";
 
     scanner.yyrestart(input);
@@ -38,7 +38,7 @@ TEST_F(binary_integer_test, match_555_w_underscore_position_middle) {
     ASSERT_EQ(7, result_value);
 }
 
-TEST_F(binary_integer_test, match_555_w_underscore_position_end) {
+TEST_F(binary_integer_test, match_integer_w_underscore_at_end) {
     input << "2#111_";
 
     scanner.yyrestart(input);

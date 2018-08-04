@@ -9,11 +9,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-
-//#include <llvm/IR/LLVMContext.h>
-//#include <llvm/IR/IRBuilder.h>
-//#include <llvm/IR/Module.h>
-//#include <llvm/IR/Value.h>
+#include <variant>
 
 #include "forward_ast.h"
 #include "meta.h"
@@ -21,12 +17,6 @@
 namespace openloco {
 namespace lang {
 namespace ast {
-
-//    static llvm::LLVMContext context;
-//    static llvm::IRBuilder<> builder(context);
-//    static std::unique_ptr<llvm::Module> module;
-//    static std::map<std::string, llvm::Value *> named_values;
-
 
     /**
      * value_wrapper

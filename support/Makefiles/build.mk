@@ -1,20 +1,24 @@
-DEBUG_DIR=/build/debug
-CC=/opt/local/bin/clang-mp-6.0
-CXX=/opt/local/bin/clang++-mp-6.0
-CMAKE_PREFIX_PATH=/opt/local:/opt/local/libexec/llvm-6.0
+CC=/opt/local/bin/clang
+CXX=/opt/local/bin/clang
+CMAKE_PREFIX_PATH=/opt/local
 CMAKE_FLAGS="-DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH)"
 
 debug:
-	mkdir -p build/debug
-	cd build/debug && CC=$(CC) CXX=$(CXX) cmake $(CMAKE_FLAGS) -DCMAKE_BUILD_TYPE=DEBUG -GNinja ../.. && ninja
+	mkdir -p build/debug && \
+		cd build/debug && \
+		cmake $(CMAKE_FLAGS) -DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX)  -DCMAKE_BUILD_TYPE=DEBUG -GNinja ../.. && \
+		cmake --build .
 
 release:
-	mkdir -p build/release
-	cd build/release && CC=$(CC) CXX=$(CXX) cmake -DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) -DCMAKE_BUILD_TYPE=RELEASE -GNinja ../.. && ninja
+	mkdir -p build/release && \
+		cd build/release && \
+		cmake -DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) -DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX)  -DCMAKE_BUILD_TYPE=RELEASE -GNinja ../.. && \
+		cmake --build .
 
 compilecommands:
 	mkdir -p build/debug
-	cd build/debug && CC=$(CC) CXX=$(CC) cmake -DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../..
+	cd build/debug && \
+		cmake -DCMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) -DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX) -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../..
 	mv build/debug/compile_commands.json support/
 
 clean-debug:

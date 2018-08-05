@@ -250,7 +250,8 @@ FIXED_POINT     {INTEGER}\.{INTEGER}
 
 ({LETTER})(({LETTER}|{DIGIT}|_))+   {
         std::string string { yytext, static_cast<size_t>(yyleng) };
-        ast::identifier value { string };
+        ast::identifier value;
+        value.value = string;
         return parser::make_IDENTIFIER(value, loc);
     }
 

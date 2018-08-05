@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <map>
 #include <string>
 #include <variant>
@@ -90,10 +91,8 @@ namespace ast {
 #pragma mark - B.1 Common elements
 #pragma mark - B.1.1 Letters, digits and identifiers
 
-    struct identifier : std::string
+    struct identifier : value_wrapper<std::string>
     {
-        using base = std::string;
-        using base::base;
     };
 
 #pragma mark - B.1.2.1 Numeric literals
@@ -156,8 +155,6 @@ namespace ast {
         using base::base;
     };
 
-
-
 #pragma mark - B.1.2.2 Character Strings
 
     struct single_byte_character_string : value_wrapper<std::string>
@@ -195,15 +192,17 @@ namespace ast {
 
     struct duration : ast::interval
     {
-        duration& operator=(const interval i)
+        duration& operator=(const interval rhs)
         {
-            value = i.value;
+            value = rhs.value;
             return *this;
         }
     };
 
     struct fixed_point : value_wrapper<double>
     {
+        using base = value_wrapper<double>;
+        using base::base;
     };
 
 #pragma mark B.1.2.3.2 Time of day and date

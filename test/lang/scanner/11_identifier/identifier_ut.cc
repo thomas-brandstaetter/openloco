@@ -9,8 +9,8 @@
 class identifier_token_test : public abstract_scanner_ut {};
 class identifier_value_test : public abstract_scanner_ut {};
 
-
-using openloco::lang::parser;
+using parser = openloco::lang::parser;
+namespace ast = openloco::lang::ast;
 
 TEST_F(identifier_token_test, match_identifier) {
 
@@ -65,7 +65,8 @@ TEST_F(identifier_value_test, match_values) {
 
     scanner.reset(input);
     parser::symbol_type result = scanner.yylex(driver);
-    std::string str_result { result.value.as<std::string>() };
+    auto result_value = result.value.as<ast::identifier>();
 
-    ASSERT_STREQ(str_result.c_str(), expected.c_str());
+
+    ASSERT_STREQ(expected.c_str(), result_value.value.c_str());
 }

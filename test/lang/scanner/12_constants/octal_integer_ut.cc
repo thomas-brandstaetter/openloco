@@ -6,9 +6,10 @@
 
 #include "../abstract_ut.h"
 
-class octal_integer_test : public abstract_scanner_ut { };
+using parser = openloco::lang::parser;
+namespace ast = openloco::lang::ast;
 
-using openloco::lang::parser;
+class octal_integer_test : public abstract_scanner_ut { };
 
 TEST_F(octal_integer_test, match_555) {
     std::stringstream input;
@@ -16,9 +17,9 @@ TEST_F(octal_integer_test, match_555) {
 
     scanner.yyrestart(input);
     parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::octal_integer>();
 
-    ASSERT_EQ(0555, result_value);
+    ASSERT_EQ(0555, result_value.value);
 }
 
 TEST_F(octal_integer_test, match_token) {
@@ -27,8 +28,9 @@ TEST_F(octal_integer_test, match_token) {
 
     scanner.yyrestart(input);
     parser::symbol_type result = scanner.yylex(driver);
+    auto result_value = result.value.as<ast::octal_integer>();
 
-    ASSERT_EQ(parser::token::OCTAL_INTEGER, result.token());
+    ASSERT_EQ(0555, result_value.value);
 }
 
 TEST_F(octal_integer_test, match_555_w_underscore_position_front) {
@@ -37,9 +39,9 @@ TEST_F(octal_integer_test, match_555_w_underscore_position_front) {
 
     scanner.yyrestart(input);
     parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::octal_integer>();
 
-    ASSERT_EQ(0555, result_value);
+    ASSERT_EQ(0555, result_value.value);
 }
 
 TEST_F(octal_integer_test, match_555_w_underscore_position_middle) {
@@ -48,9 +50,9 @@ TEST_F(octal_integer_test, match_555_w_underscore_position_middle) {
 
     scanner.yyrestart(input);
     parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::octal_integer>();
 
-    ASSERT_EQ(0555, result_value);
+    ASSERT_EQ(0555, result_value.value);
 }
 
 TEST_F(octal_integer_test, match_555_w_underscore_position_end) {
@@ -59,7 +61,7 @@ TEST_F(octal_integer_test, match_555_w_underscore_position_end) {
 
     scanner.yyrestart(input);
     parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::octal_integer>();
 
-    ASSERT_EQ(0555, result_value);
+    ASSERT_EQ(0555, result_value.value);
 }

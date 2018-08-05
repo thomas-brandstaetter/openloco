@@ -26,12 +26,12 @@ unit_test(
         LINK_FLEX
 )
 
-unit_test(
-        TARGET  fixed_point_ut
-        SOURCES fixed_point_ut.cc
-        LIBRARIES parser ${CONAN_LIBS}
-        LINK_FLEX
-)
+#unit_test(
+#        TARGET  fixed_point_ut
+#        SOURCES fixed_point_ut.cc
+#        LIBRARIES parser ${CONAN_LIBS}
+#        LINK_FLEX
+#)
 
 unit_test(
         TARGET  single_byte_string_ut

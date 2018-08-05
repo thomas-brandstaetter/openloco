@@ -6,6 +6,9 @@
 
 #include "../abstract_ut.h"
 
+using parser = openloco::lang::parser;
+namespace ast = openloco::lang::ast;
+
 class hex_integer_test : public abstract_scanner_ut { };
 
 TEST_F(hex_integer_test, match_555) {
@@ -13,10 +16,10 @@ TEST_F(hex_integer_test, match_555) {
     input << "16#555";
 
     scanner.reset(input);
-    openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    parser::symbol_type result = scanner.yylex(driver);
+    auto result_value = result.value.as<ast::hex_integer>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(0x555, result_value.value);
 }
 
 TEST_F(hex_integer_test, match_555_w_underscore_position_front) {
@@ -24,10 +27,10 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_front) {
     input << "16#5_55";
 
     scanner.reset(input);
-    openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    parser::symbol_type result = scanner.yylex(driver);
+    auto result_value = result.value.as<ast::hex_integer>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(0x555, result_value.value);
 }
 
 TEST_F(hex_integer_test, match_555_w_underscore_position_middle) {
@@ -35,10 +38,10 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_middle) {
     input << "16#55_5";
 
     scanner.reset(input);
-    openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    parser::symbol_type result = scanner.yylex(driver);
+    auto result_value = result.value.as<ast::hex_integer>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(0x555, result_value.value);
 }
 
 TEST_F(hex_integer_test, match_555_w_underscore_position_end) {
@@ -46,8 +49,8 @@ TEST_F(hex_integer_test, match_555_w_underscore_position_end) {
     input << "16#555_";
 
     scanner.reset(input);
-    openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    parser::symbol_type result = scanner.yylex(driver);
+    auto result_value = result.value.as<ast::hex_integer>();
 
-    ASSERT_EQ(0x555, result_value);
+    ASSERT_EQ(0x555, result_value.value);
 }

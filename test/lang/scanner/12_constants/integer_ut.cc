@@ -6,6 +6,9 @@
 
 #include "../abstract_ut.h"
 
+using parser = openloco::lang::parser;
+namespace ast = openloco::lang::ast;
+
 class integer_test : public abstract_scanner_ut { };
 
 TEST_F(integer_test, match_555) {
@@ -13,9 +16,9 @@ TEST_F(integer_test, match_555) {
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::integer>();
 
-    ASSERT_EQ(555, result_value);
+    ASSERT_EQ(555, result_value.value);
 }
 
 TEST_F(integer_test, match_555_w_underscore_position_front) {
@@ -23,9 +26,9 @@ TEST_F(integer_test, match_555_w_underscore_position_front) {
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::integer>();
 
-    ASSERT_EQ(555, result_value);
+    ASSERT_EQ(555, result_value.value);
 }
 
 TEST_F(integer_test, match_555_w_underscore_position_middle) {
@@ -33,9 +36,9 @@ TEST_F(integer_test, match_555_w_underscore_position_middle) {
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::integer>();
 
-    ASSERT_EQ(555, result_value);
+    ASSERT_EQ(555, result_value.value);
 }
 
 TEST_F(integer_test, match_555_w_underscore_position_end) {
@@ -43,7 +46,7 @@ TEST_F(integer_test, match_555_w_underscore_position_end) {
 
     scanner.yyrestart(input);
     openloco::lang::parser::symbol_type result = scanner.yylex(driver);
-    auto result_value = result.value.as<long>();
+    auto result_value = result.value.as<ast::integer>();
 
-    ASSERT_EQ(555, result_value);
+    ASSERT_EQ(555, result_value.value);
 }

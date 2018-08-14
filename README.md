@@ -28,7 +28,7 @@ Goals:
     
 * Implement the standard
 * use LLVM to
-    * code generation 
+    * generate code 
     * prepare JIT
  
 ## Development

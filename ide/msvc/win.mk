@@ -5,3 +5,5 @@ vs:
 vso:
 	cd build\msvs-debug && start openloco.sln
 
+clean-vs:
+	cd build\msvs-debug && del /S /Q /F *

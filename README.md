@@ -35,7 +35,7 @@ Goals:
 
 Tools used in this project
 
-* C++ 17, Boost, Qt
+* C++ 17, Boost
 * python
 * cmake, ninja
 * bison/flex

@@ -7,10 +7,10 @@ Take a look at the develop branch for recent features.
 
 Goals:
 
-* Multiplatform:  Linux, Unix, macOS, Windows
+* Multiplatform:  Linux, macOS. FreeBSD
 * Implement the full Standard (based on IEC:2003)
 * Postscript for vector graphics output of graphical languages
-* Just-In-Time compiling of STL code.
+* Just-In-Time compiling of STL and IL code.
 * Compiles into LLVM 7 IL to support as many target platforms as possible
     * take a look at [LLVM Targets](https://llvm.org/devmtg/2014-04/PDFs/LightningTalks/2014-3-31_ClangTargetSupport_LighteningTalk.pdf)
 * Bindings for popular languages
@@ -41,3 +41,4 @@ Tools used in this project
 * bison/flex
 * postscript
 * LLVM
+* sqlite

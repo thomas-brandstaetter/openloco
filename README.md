@@ -38,7 +38,7 @@ Tools used in this project
 * C++ 17, Boost
 * python
 * cmake, ninja
-* bison/flex
+* ~~bison/flex~~ antlr4 (we live in the 21th century)
 * postscript
 * LLVM
 * sqlite

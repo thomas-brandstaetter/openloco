@@ -3,9 +3,8 @@
 openloco is an open source implementation of IEC 61131-3 languages - espacially STL.
 Take a look at the develop branch for recent features.
 
-## Make IEC 61131-3 great again
-
 Goals:
+-----
 
 * Multiplatform:  Linux, macOS. FreeBSD
 * Implement the full Standard (based on IEC:2003)

@@ -1,5 +1,4 @@
 function(unit_test)
-    set(flagValueArgs "LINK_FLEX")
     set(singleValueArgs TARGET)
     set(multiValueArgs SOURCES;LIBRARIES)
 
@@ -10,7 +9,7 @@ function(unit_test)
             "${multiValueArgs}"	    	# multi value variables
             ${ARGN}
     )
-        
+
     add_executable(
             ${unit_test_TARGET}
             ${unit_test_SOURCES}
@@ -23,13 +22,6 @@ function(unit_test)
             ${CMAKE_THREAD_LIBS_INIT}
             ${Boost_LIBRARIES}
     )
-
-    if (${unit_test_LINK_FLEX})
-        target_link_libraries(
-                ${unit_test_TARGET}
-                ${FLEX_LIBRARIES}
-        )
-    endif()
 
     add_test(
             NAME "${unit_test_TARGET}"

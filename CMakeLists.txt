@@ -17,10 +17,8 @@ project(openloco C CXX)
 # ----------------------------------------------------------------------------
 
 add_definitions(-std=c++17)
+add_definitions(-g)
 
-if({CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_definitions(-stdlib=libc++)
-endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -63,23 +61,13 @@ endif()
 find_package(Threads REQUIRED)
     message("--    PThreads found: ${THREADS_FOUND}")
 
-
 find_package(GTest REQUIRED pthread)
     message("--    GTest found:    ${GTEST_FOUND}")
     include_directories(${GTEST_INCLUDE_DIRS})
 
-find_package(BISON REQUIRED)
-	message("--    Bison version ${BISON_VERSION}")
-
-
-find_package(FLEX REQUIRED)
-	message("--    ${FLEX_version_output}")
-	include_directories(${FLEX_INCLUDE_DIRS})
-
-
 find_package(Boost COMPONENTS system thread program_options REQUIRED)
-	include_directories(${BOOST_INCLUDEDIR})
-	link_directories(${BOOST_LIBRARYDIR})
+#	include_directories(${BOOST_INCLUDEDIR})
+#	link_directories(${BOOST_LIBRARYDIR})
 
 
 # see: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
@@ -91,24 +79,21 @@ find_package(LLVM 6.0 REQUIRED CONFIG)
     message("--    LLVM version:   ${LLVM_VERSION_BASE_STRING}")
     message("--    Target Triple:  ${LLVM_HOST_TARGET}")
 
-    include_directories(${LLVM_INCLUDE_DIRS})
-    add_definitions(${LLVM_DEFINITIONS})
-    #link_directories(${LLVM_LIBRARY_DIRS})
+    # include_directories(${LLVM_INCLUDE_DIRS})
+    # add_definitions(${LLVM_DEFINITIONS})
+    # link_directories(${LLVM_LIBRARY_DIRS})
     llvm_map_components_to_libnames($OPENLOCO_LLVM_LIBS support core irreader)
     # all-targets analysis asmparser asmprinter bitreader bitwriter codegen core debuginfocodeview debuginfodwarf debuginfomsf debuginfopdb globalisel instcombine ipa ipo instrumentation irreader libdriver linker lto mc mcdisassembler mcparser objcarcopts object option profiledata scalaropts selectiondag support tablegen target transformutils vectorize windowsmanifest
 
-set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.10.1/clang_64")
-find_package(Qt5 COMPONENTS Core REQUIRED)
-        message("-- Qt ")
+    #set(CMAKE_PREFIX_PATH "/Users/tb/usr/Qt/5.11.3/clang_64")
+    #find_package(Qt5 COMPONENTS Core REQUIRED)
+    #        message("-- Qt ")
 
 # ----------------------------------------------------------------------------
 # CTEST CDASH
 # ----------------------------------------------------------------------------
 
 include(CTest)
-enable_testing()
-
-add_definitions(-g)
 enable_testing()
 
 
@@ -118,8 +103,6 @@ enable_testing()
 
 message("-- Configuring begin")
 
-add_subdirectory(include)
-add_subdirectory(src)
-add_subdirectory(test)
+add_subdirectory(source)
 
 message("-- Configuring end")

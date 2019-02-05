@@ -1,0 +1,16 @@
+*(* @see [2] Example 3.8 *)
+
+TYPE
+    StructureA :
+    STRUCT
+        Element1 : INT;
+        Element2 : StructureB;  (* legal: sub structure *)
+        Element3 : BYTE;
+    END_STRUCT;
+    StructureB :
+    STRUCT
+        Element1 : LINT;
+        Element2 : StructureA;  (* illegal: recursive to StructureA *)
+        Element3 : WORD;
+    END_STRUCT;
+END_TYPE

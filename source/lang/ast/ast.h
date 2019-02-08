@@ -74,7 +74,7 @@ namespace ast {
     template<typename TNT, typename ST, typename VT>
     struct TypeDeclarationBase {
 
-        virtual ~TypeDeclarationBase() {}
+        virtual ~TypeDeclarationBase() = default;
 
         struct SpecInit
         {
@@ -102,69 +102,73 @@ namespace ast {
 
 #pragma mark - B.1.2.1 Numeric literals
 
-    template<typename T, int TS, char const * TN>
-    struct Elementary : ValueWrapper<T>
-    {
-        Elementary() = default;
-        ~Elementary() = default;
+    template <typename T>
+    struct Elementary : ValueWrapper<T> {
+        Elementary() : typeSize(sizeof(T)) {}
+        ~Elementary() override = default;
+        Elementary(const Elementary &) = default;
         Elementary& operator=(const Elementary& rhs) = default;
 
-        const std::string type_name { TN };
-        const int type_size{TS};
+        const unsigned int typeSize;
     };
 
-    template<typename T, int TS, char const * TN>
-    struct Numeric : public Elementary<T, TS, TN>
+    template <typename T>
+    struct Numeric : public Elementary<T>
     {
     };
 
-    template<typename T, int TS, char const * TN>
-    struct Integer : public Numeric<T, TS, TN>
+    template<typename T>
+    struct Integer : Elementary<T>
     {
         static const T s_kInfinum  = 0;
-        static const T s_kSupremum = (1 << TS) - 1;
+        static const T s_kSupremum = 0 - 1;
     };
 
-    template<typename T, int TS, char const * TN>
-    struct SignedInteger : public Integer<T, TS, TN>
+    struct USINT : public Integer<uint8_t> {};
+    struct UINT  : public Integer<uint16_t> {};
+    struct UDINT : public Integer<uint32_t> {};
+    struct ULINT : public Integer<uint64_t> {};
+
+    template<typename T>
+    struct SignedInteger : Integer<T>
     {
-    private:
-        static const T _2powN_1 = (1 << (TS - 1))-1 ;
     public:
-        static const T s_kInfinum = _2powN_1;
-        static const T s_kSupremum = _2powN_1 - 1;
+        static const T s_kInfinum = (1 << (sizeof(T) - 1));
+        static const T s_kSupremum = ((1 << (sizeof(T) - 1))-1); // FIXME: 0-1
     };
 
-    struct SINT : public SignedInteger<int8_t, 8, "SINT"> {};
-    struct INT : public Integer<int16_t, 16, "INT"> {};
-    struct DINT : public Integer<int32_t, 32, "DINT"> {};
-    struct LINT : public Integer<int64_t, 64, "LINT"> {};
+    struct SINT : public SignedInteger<int8_t> {};
+    struct INT  : public SignedInteger<int16_t> {};
+    struct DINT : public SignedInteger<int32_t> {};
+    struct LINT : public SignedInteger<int64_t> {};
 
-    struct BinaryInteger : ValueWrapper<long>
+
+
+    struct BinaryInteger : ValueWrapper<LINT>
     {
     };
 
-    struct OctalInteger : ValueWrapper<long>
+    struct OctalInteger : ValueWrapper<unsigned long>
     {
     };
 
-    struct HexInteger : ValueWrapper<long>
+    struct HexInteger : ValueWrapper<unsigned long>
     {
     };
 
-    struct BooleanLiteral : ValueWrapper<bool>
+    struct BooleanLiteral : ValueWrapper<unsigned long>
     {
     };
 
-    struct BitStringLiteral : Variant<Integer, BinaryInteger, OctalInteger, HexInteger>
+    struct BitStringLiteral : Variant<BinaryInteger, OctalInteger, HexInteger> // FIXME: add Integer
     {
-        using base = Variant<Integer, BinaryInteger, OctalInteger, HexInteger>;
+        using base = Variant<BinaryInteger, OctalInteger, HexInteger>;
         using base::base;
     };
 
-    struct IntegerLiteral : Variant<SignedInteger, Integer, BinaryInteger, OctalInteger, HexInteger>
+    struct IntegerLiteral : Variant<BinaryInteger, OctalInteger, HexInteger> // FIXME: add Integer
     {
-        using base = Variant<SignedInteger, Integer, BinaryInteger, OctalInteger, HexInteger>;
+        using base = Variant<BinaryInteger, OctalInteger, HexInteger>;
         using base::base;
 
         enum class integer_type_name;
@@ -305,27 +309,26 @@ namespace ast {
 //        TIME                            = elementary_type_name | 0x00020000,
 //    };
 
-    template<char const* T>
-    struct ElementaryTypeName
-    {
-        std::string typeName { T };
-        std::vector<std::string> validList { "ANY_ELEMEARY" };
-    };
-
-    template<char const* T>
-    struct NumericTypeName : public ElementaryTypeName<T>
-    {
-        NumericTypeName() : ElementaryTypeName<T>()
-        {
-            validList.insert("ANY_NUMERIC");
-
-        }
-    };
-
-    template <char const* T, int TS>
-    struct IntegerTypeName : public NumericTypeName<T>
-    {
-    };
+//    template<const char* TName>
+//    struct ElementaryTypeName
+//    {
+//        const std::string& typeName()
+//        {
+//            static std::string tn { TName };
+//            return tn;
+//        }
+//    };
+//
+//
+//    template<const char* TName>
+//    struct NumericTypeName : public ElementaryTypeName<TName>
+//    {
+//    };
+//
+//    template <const char* TName>
+//    struct IntegerTypeName : public NumericTypeName<TName>
+//    {
+//    };
 
     //
     //
@@ -333,18 +336,18 @@ namespace ast {
     //
     //
 
-    template<char const* T, int TS>
-    struct SignedIntegerType : public IntegerTypeName<T, TS>
-    {
+//    template<const char* TName>
+//    struct SignedIntegerTypeName : public IntegerTypeName<TName>
+//    {
+//    };
+//
+//    constexpr char* kSINT = "SINT";
+//
+//    using SINTTypeName = SignedIntegerTypeName<kSINT>;
+//    using INTTypeName  = SignedIntegerTypeName<"INT">;
+//    using DINTTypeName = SignedIntegerTypeName<"DINT">;
+//    using LINTTypeName = SignedIntegerTypeName<"LINT">;
 
-    };
-
-    using SINTTypeName = SignedIntegerType<int8_t,  8>;
-    using INTTypeName  = SignedIntegerType<int16_t, 16>;
-    using DINTTypeName = SignedIntegerType<int32_t, 32>;
-    using LINTTypeName = SignedIntegerType<int64_t, 64>;
-
-    using SignedIntegerTypeName = Identifier;
 
     //
     //
@@ -352,21 +355,10 @@ namespace ast {
     //
     //
 
-
-    template<typename T, int TS>
-    struct UnsignedIntegerType : public ValueWrapper<T>, IntegerTypeName<T, TS>
-    {
-    public:
-        const T kInfinum = 0;
-        const T kSupremum = 1 << IntegerTypeName<T, TS>::_2powN;
-    };
-
-    using USINT = UnsignedIntegerType<uint8_t, 8>;
-    using UINT  = UnsignedIntegerType<uint16_t,16>;
-    using UDINT = UnsignedIntegerType<uint32_t,32>;
-    using ULINT = UnsignedIntegerType<uint64_t,64>;
-
-    using UnsignedIntegerTypeName = Identifier;
+//    using USINTTypeName = IntegerTypeName<"USINT">;
+//    using UINTTypeName  = IntegerTypeName<"UINT">;
+//    using UDINTTypeName = IntegerTypeName<"UDINT">;
+//    using ULINTTypeName = IntegerTypeName<"ULINT">;
 
     //
     //
@@ -375,46 +367,55 @@ namespace ast {
     //
 
 
-    template<typename T>
-    struct RealType : public NumericTypeName<T>, public ValueWrapper<T>
-    {
-    };
-
-    using REAL = RealType<float>;
-    using LREAL = RealType<double>;
-
-    enum class DateTypeName {
-        DATE                            = static_cast<int>(ElementaryTypeName::date_type_name) | 1,
-        TIME_OF_DAY,
-        DATE_AND_TIME
-    };
-
-    enum class BitStringTypeName {
-        BOOL                            = static_cast<int>(ElementaryTypeName::bit_string_type_name) | 1,
-        BYTE,
-        WORD,
-        DWORD,
-        LWORD,
-    };
-
+//    template<const char* TName>
+//    struct RealType : public NumericTypeName<T>
+//    {
+//    };
+//
+//    using REAL  = RealType<"REAL">;
+//    using LREAL = RealType<"LREAL">;
+//
+//    template<const char* TName>
+//    struct DateTypeName : public ElementaryTypeName<TName>
+//    {
+//    };
+//
+//    using DATE = DateTypeName<"DATE">;
+//    using TIME_OF_DAY = DateTypeName<"TIME_OF_DAY">;
+//    using DATE_AND_TIME = DateTypeName<"DATE_AND_TIME">;
+//
+//    template<const char* TName>
+//    struct BitStringTypeName : public ElementaryTypeName<TName>
+//    {
+//    };
+//
+//    using BOOL = DateTypeName<"BOOL">;
+//    using BYTE = DateTypeName<"BYTE">;
+//    using WORD = DateTypeName<"WORD">;
+//    using DWORD = DateTypeName<"DWORD">;
+//    using LWORD = DateTypeName<"LWORD">;
 
 #pragma mark B.1.3.2 Generic data types
 
-    enum class GenericTypeName {
-         ANY                = 0x40000000
-        ,ANY_DERIVED        = 0x10000000    | static_cast<int>(ANY)
-        ,ANY_ELEMENTARY     = 0x20000000    | static_cast<int>(ANY)
-        ,ANY_MAGNITUDE      = 0x00100000    | static_cast<int>(ANY_ELEMENTARY)
-        ,ANY_NUM            = 0x00010000    | static_cast<int>(ANY_MAGNITUDE)
-        ,ANY_REAL           = 0x00001000    | static_cast<int>(ANY_NUM)
-        ,ANY_INT            = 0x00002000    | static_cast<int>(ANY_NUM)
-        ,ANY_TIME           = 0x00020000    | static_cast<int>(ANY_MAGNITUDE)
-        ,ANY_BIT            = 0x00200000    | static_cast<int>(ANY_ELEMENTARY)
-        ,ANY_STRING         = 0x00400000    | static_cast<int>(ANY_ELEMENTARY)
-        ,ANY_DATE           = 0x00800000    | static_cast<int>(ANY_ELEMENTARY)
-    };
+//    enum class GenericTypeName {
+//         ANY                = 0x40000000
+//        ,ANY_DERIVED        = 0x10000000    | static_cast<int>(ANY)
+//        ,ANY_ELEMENTARY     = 0x20000000    | static_cast<int>(ANY)
+//        ,ANY_MAGNITUDE      = 0x00100000    | static_cast<int>(ANY_ELEMENTARY)
+//        ,ANY_NUM            = 0x00010000    | static_cast<int>(ANY_MAGNITUDE)
+//        ,ANY_REAL           = 0x00001000    | static_cast<int>(ANY_NUM)
+//        ,ANY_INT            = 0x00002000    | static_cast<int>(ANY_NUM)
+//        ,ANY_TIME           = 0x00020000    | static_cast<int>(ANY_MAGNITUDE)
+//        ,ANY_BIT            = 0x00200000    | static_cast<int>(ANY_ELEMENTARY)
+//        ,ANY_STRING         = 0x00400000    | static_cast<int>(ANY_ELEMENTARY)
+//        ,ANY_DATE           = 0x00800000    | static_cast<int>(ANY_ELEMENTARY)
+//    };
+//
+//    using NonGenericTypeName = std::variant<ElementaryTypeName, std::string>;
 
-    using NonGenericTypeName = std::variant<ElementaryTypeName, std::string>;
+    using ElementaryTypeName = Identifier;
+    using NonGenericTypeName = Identifier;
+    using IntegerTypeName = Identifier;
 
 #pragma mark B.1.3.3 Derived data types
 
@@ -424,7 +425,7 @@ namespace ast {
     using SubrangeTypeName = Identifier;
     using EnumeratedTypeName = Identifier;
     using ArrayTypeName = Identifier;
-    using StructureTypeName = Identifier;
+    struct StructureTypeName : public Identifier {};
     using StringTypeName = Identifier;
 
     using SingleElementTypeName = Variant<SimpleTypeName, SubrangeTypeName, EnumeratedTypeName>;
@@ -432,7 +433,14 @@ namespace ast {
 
     // simple-- ----------------------
 
-    struct SimpleSpecInit : Variant<ElementaryTypeName, SimpleTypeName> {};
+
+    struct SimpleSpecification : Variant<ElementaryTypeName, SimpleTypeName> {};
+
+    struct SimpleSpecInit
+    {
+        SimpleSpecification specification;
+        Constant constant;
+    };
 
     struct SimpleTypeDeclaration : TypeDeclarationBase<
         SubrangeTypeName,
@@ -502,8 +510,6 @@ namespace ast {
         unsigned long size;
         ast::CharacterString value;
     };
-
-
 
     // -------------------------------
     struct SingleElementTypeDeclaration : std::variant<
@@ -733,10 +739,49 @@ namespace ast {
     };
 
 
-    using Var1List = std::vector<std::string>;
 
-    struct Var1InitDecl {
-        using SpecInit = std::variant<
+    using Var1List = std::vector<VariableName>;
+
+    struct EdgeDeclaration
+    {
+        Var1List variableList;
+        EdgeValue edge;
+    };
+
+    struct VarInitDecl;
+    struct InputDeclaration : public Variant<ForwardAst<VarInitDecl>, EdgeDeclaration>
+    {
+    };
+
+    struct InputDeclarations
+    {
+        RetainValue retain;
+        std::vector<InputDeclaration> declarations;
+    };
+
+    struct Var1InitDecl;
+    struct ArrayVarInitDecl;
+    struct StructuredVarInitDecl;
+    struct FbNameDecl;
+    struct StringVarDecl;
+
+    struct VarInitDecl : Variant<
+        ForwardAst<Var1InitDecl>,
+        ForwardAst<ArrayVarInitDecl>,
+        ForwardAst<StructuredVarInitDecl>,
+        ForwardAst<FbNameDecl>,
+        ForwardAst<StringVarDecl>>
+    {
+
+    };
+
+    struct Var1InitDecl : Variant<
+        SimpleTypeDeclaration::SpecInit,
+        SubrangeTypeDeclaration::SpecInit,
+        EnumeratedTypeDeclaration::SpecInit>
+    {
+
+        using SpecInit = Variant<
             SimpleTypeDeclaration::SpecInit,
             SubrangeTypeDeclaration::SpecInit,
             EnumeratedTypeDeclaration::SpecInit>;
@@ -751,55 +796,92 @@ namespace ast {
         ArrayTypeDeclaration::SpecInit specification;
     };
 
-    struct StructuredVarInitDecl {
+    struct StructuredVarInitDecl
+    {
         Var1List variables;
         InitializedStructure structure;
     };
 
-    using FbNameList = std::vector<std::string>;
-    using FbName = Identifier;
+    /** FbName **/
+    using FunctionBlockName = Identifier;
+    using FbNameList = std::vector<FunctionBlockName>;
 
-    struct FBNameDecl
+    struct FbNameDecl
     {
-        FbNameList fb_names;
-        std::string name;
+        FbNameList names;
+        FunctionBlockName name;
         StructureInitialization initialization;
     };
 
-    struct FBName
+    struct OutputDeclarations
     {
-        using List = std::vector<FBName>;
-
-        Identifier identifier;
-    };
-
-    struct Var1Declaration;
-    struct ArrayVarDelcaration;
-    struct StructureVarDeclaration;
-    struct StringVarDeclaration;
-
-    struct TempVarDecl : Variant<ForwardAst<Var1Declaration>, ForwardAst<ArrayVarDelcaration>, ForwardAst<StructureVarDeclaration>, ForwardAst<StringVarDeclaration>>
-    {
-        using base = Variant<ForwardAst<Var1Declaration>, ForwardAst<ArrayVarDelcaration>, ForwardAst<StructureVarDeclaration>, ForwardAst<StringVarDeclaration>>;
-        using base::base;
-    };
-
-    struct VarDeclaration : Variant<TempVarDecl, FBNameDecl>
-    {
-        using base = Variant<TempVarDecl, FBNameDecl>;
-        using base::base;
+        RetainValue retain;
+        std::vector<VarInitDecl> variableInitDeclarations;
     };
 
     struct Var1Declaration
     {
-        Var1List varlist;
-
-        struct Specification : Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification>
-        {
-            using base = Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification>;
-            using base::base;
-        };
+        Var1List variableList;
+        Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification> specification;
     };
+
+    struct ArrayVarDeclaration
+    {
+        Var1List variableList;
+        ArraySpecification specification;
+    };
+
+    struct StructuredVarDelcaration
+    {
+        Var1List variableList;
+        StructureTypeName specification;
+    };
+
+    struct StringVarDeclaration;
+    struct TempVarDecl : Variant<Var1Declaration, ArrayVarDeclaration, StructuredVarDelcaration, ForwardAst<StringVarDeclaration>>
+    {
+        using base = Variant<Var1Declaration, ArrayVarDeclaration, StructuredVarDelcaration, ForwardAst<StringVarDeclaration>>;
+        using base::base;
+    };
+
+    struct VarDeclaration : Variant<TempVarDecl, FbNameDecl>
+    {
+        using base = Variant<TempVarDecl, FbNameDecl>;
+        using base::base;
+    };
+
+    struct RetentiveVarDeclarations
+    {
+        RetainValue retain;
+        std::vector<VarInitDecl> initDeclarations;
+    };
+
+    struct InputOutputDeclarations
+    {
+        std::vector<VarDeclaration> declarations;
+    };
+
+//    struct Var1Declaration;
+//    struct ArrayVarDelcaration;
+//    struct StructureVarDeclaration;
+//    struct StringVarDeclaration;
+
+//    struct VarDeclaration : Variant<TempVarDecl, FbNameDecl>
+//    {
+//        using base = Variant<TempVarDecl, FBNameDecl>;
+//        using base::base;
+//    };
+
+//    struct Var1Declaration
+//    {
+//        Var1List varlist;
+//
+//        struct Specification : Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification>
+//        {
+//            using base = Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification>;
+//            using base::base;
+//        };
+//    };
 
     struct OutputDeclaration
     {
@@ -834,23 +916,29 @@ namespace ast {
         std::vector<VarInitDecl> declarationss;
     };
 
-    struct LocatedVarDeclaration
+    struct LocatedVarDecl;
+    struct LocatedVarDeclarations
     {
+        RetainValue retain;
         std::vector<LocatedVarDecl> declaration;
     };
 
+    struct Location;
+    struct LocatedVarSpecInit;
     struct LocatedVarDecl
     {
         VariableName name;
-        Location location;
-        LocatedVarSpecInit specInit;
+        ForwardAst<Location> location;
+        ForwardAst<LocatedVarSpecInit> specInit;
     };
 
     // external -------------------------
 
+    struct GlobalVarName;
+    struct FunctionBlockTypeName;
     struct ExternalDeclaration
     {
-        GlobalVarName varName;
+        ForwardAst<GlobalVarName> varName;
 
         struct Specification : Variant <
             SimpleSpecification,
@@ -858,7 +946,7 @@ namespace ast {
             EnumeratedSpecification,
             ArraySpecification,
             StructureTypeName,
-            FunctionBlockTypeName>
+            ForwardAst<FunctionBlockTypeName>>
         {
             using base = Variant <
                 SimpleSpecification,
@@ -866,7 +954,7 @@ namespace ast {
                 EnumeratedSpecification,
                 ArraySpecification,
                 StructureTypeName,
-                FunctionBlockTypeName>;
+                ForwardAst<FunctionBlockTypeName>>;
             using base::base;
         };
 
@@ -882,46 +970,55 @@ namespace ast {
 
     // global ---------------------------
 
-    using GlobalVarName = Identifier;
-
-    struct GlobalVarDeclarations
+    struct GlobalVarName : public Identifier
     {
-        std::vector<GlobalVarDecl> declarations
-    };
-
-    struct GlobalVarDecl
-    {
-        GlobalVarSpec varSpecification;
-
-        struct Specification : Variant<LocatedVarSpecInit, FunctionBlockTypeName>
-        {
-            using base = Variant<LocatedVarSpecInit, FunctionBlockTypeName>;
-            using base::base;
-        };
-        Specification specification;
     };
 
     struct GlobalVarSpec
     {
     };
 
+    struct LocatedVarSpecInit;
+    struct GlobalVarDecl
+    {
+        GlobalVarSpec varSpecification;
+
+        struct Specification : Variant<ForwardAst<LocatedVarSpecInit>, ForwardAst<FunctionBlockTypeName>>
+        {
+            using base = Variant<ForwardAst<LocatedVarSpecInit>, ForwardAst<FunctionBlockTypeName>>;
+            using base::base;
+        };
+        Specification specification;
+    };
+
+    struct GlobalVarDeclarations
+    {
+        std::vector<GlobalVarDecl> declarations;
+    };
+
+    struct SubrangeSpecInit;
+    struct EnumeratedSpecInit;
+    struct ArraySpecInit;
+    struct SingleByteStringSpec;
+    struct DoubleByteStringSpec;
+
     struct LocatedVarSpecInit : Variant<
         SimpleSpecInit,
-        SubrangeSpecInit,
-        EnumeratedSpecInit,
-        ArraySpecInit,
-        InitializedStructure,
-        SingleByteStringSpec,
-        DoubleByteStringSpec>
+        ForwardAst<SubrangeSpecInit>,
+        ForwardAst<EnumeratedSpecInit>,
+        ForwardAst<ArraySpecInit>,
+        ForwardAst<InitializedStructure>,
+        ForwardAst<SingleByteStringSpec>,
+        ForwardAst<DoubleByteStringSpec>>
     {
         using base = Variant<
             SimpleSpecInit,
-            SubrangeSpecInit,
-            EnumeratedSpecInit,
-            ArraySpecInit,
-            InitializedStructure,
-            SingleByteStringSpec,
-            DoubleByteStringSpec>;
+            ForwardAst<SubrangeSpecInit>,
+            ForwardAst<EnumeratedSpecInit>,
+            ForwardAst<ArraySpecInit>,
+            ForwardAst<InitializedStructure>,
+            ForwardAst<SingleByteStringSpec>,
+            ForwardAst<DoubleByteStringSpec>>;
         using base::base;
     };
 
@@ -937,28 +1034,28 @@ namespace ast {
 
     // string ---------------------------
 
+    struct SingleByteStringSpec
+    {
+        Integer<uint64_t> size;
+        SingleByteCharacterString characterString;
+    };
+
     struct SingleByteStringVarDeclaration
     {
         Var1List variables;
         SingleByteStringSpec stringSpec;
     };
 
-    struct SingleByteStringSpec
+    struct DoubleByteStringSpec
     {
-        Integer size;
-        SingleByteCharacterString characterString;
+        Integer<uint64_t> size;
+        DoubleByteCharacterString characterString;
     };
 
     struct DoubleByteStringVarDeclaration
     {
         Var1List variables;
         DoubleByteStringSpec stringSpec;
-    };
-
-    struct DoubleByteStringSpec
-    {
-        Integer size;
-        DoubleByteCharacterString characterString;
     };
 
     struct StringVarDeclaration : Variant<SingleByteStringVarDeclaration, DoubleByteStringVarDeclaration>
@@ -982,10 +1079,12 @@ namespace ast {
         ForwardAst<VarSpec> varSpec;
     };
 
-    struct IncomplLocatedVarDeclarations :
+    struct IncomplLocatedVarDeclarations
+    {
+    };
 
     // TODO:
-    struct VarSpec : Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification, ArraySpecification, StructireTypeName>
+    struct VarSpec : Variant<SimpleSpecification, SubrangeSpecification, EnumeratedSpecification, ArraySpecification, StructureTypeName>
     {
     };
 
@@ -1016,6 +1115,12 @@ namespace ast {
         using base::base;
     };
 
+    struct Var2InitDecl : public Variant<Var1InitDecl, ArrayVarInitDecl, StructuredVarInitDecl, StringVarDeclaration>
+    {
+        using base = Variant<Var1InitDecl, ArrayVarInitDecl, StructuredVarInitDecl, StringVarDeclaration>;
+        using base::base;
+    };
+
     struct FunctionVarDecls
     {
         std::vector<Var2InitDecl> declarations;
@@ -1023,39 +1128,31 @@ namespace ast {
 
 #pragma mark - B.1.5.2 Function Blocks
 
-    struct FunctionBlockTypeName : Variant<StandardFunctionBlockName, DerivedFunctionBlockName>
-    {
-
-    };
-
-    struct StandardFunctionBlockName
+    struct StandardFunctionBlockName : public Identifier
     {
     };
 
-    struct DerivedFunctionBlockName
+    struct DerivedFunctionBlockName : public Identifier
     {
-        Identifier identifier;
     };
 
-    struct FunctionBlockDeclaration
+    struct FunctionBlockTypeName : public Variant<StandardFunctionBlockName, DerivedFunctionBlockName>
     {
-        DerivedFunctionBlockName functionBlockName;
-
-        struct Declarations : Variant<IOVarDeclarations, OtherVarDeclarations>
-        {
-            using base = Variant<IOVarDeclarations, OtherVarDeclarations>;
-            using base::base;
-        };
-
-        std::vector<Declarations> declarations;
-        FunctionBlockBody body;
+        using base = Variant<StandardFunctionBlockName, DerivedFunctionBlockName>;
+        using base::base;
     };
+
+    struct NonRetentiveVarDecls
+    {
+        std::vector<VarInitDecl> initDeclaratoins;
+    };
+
 
     struct OtherVarDeclarations : Variant<
         ExternalVarDeclarations,
         VarDeclarations,
         RetentiveVarDeclarations,
-        NonRetentiveVarDeclarations,
+        NonRetentiveVarDecls,
         TempVarDecl,
         IncomplLocatedVarDeclarations>
     {
@@ -1063,10 +1160,36 @@ namespace ast {
             ExternalVarDeclarations,
             VarDeclarations,
             RetentiveVarDeclarations,
-            NonRetentiveVarDeclarations,
+            NonRetentiveVarDecls,
             TempVarDecl,
             IncomplLocatedVarDeclarations>;
         using base::base;
+    };
+
+    struct SequentialFunctionChart;
+    struct LadderDiagram;
+    struct FunctionBlockDiagram;
+    struct InstructionList;
+    struct StatementList;
+
+    struct FunctionBlockBody : Variant<ForwardAst<SequentialFunctionChart>, ForwardAst<LadderDiagram>, ForwardAst<FunctionBlockDiagram>, ForwardAst<InstructionList>, ForwardAst<StatementList>>
+    {
+        using base = Variant<ForwardAst<SequentialFunctionChart>, ForwardAst<LadderDiagram>, ForwardAst<FunctionBlockDiagram>, ForwardAst<InstructionList>, ForwardAst<StatementList>>;
+        using base::base;
+    };
+
+    struct FunctionBlockDeclaration
+    {
+        DerivedFunctionBlockName functionBlockName;
+
+        struct Declarations : Variant<IoVarDeclaration, OtherVarDeclarations>
+        {
+            using base = Variant<IoVarDeclaration, OtherVarDeclarations>;
+            using base::base;
+        };
+
+        std::vector<Declarations> declarations;
+        FunctionBlockBody body;
     };
 
     struct TempVarDecls
@@ -1074,27 +1197,10 @@ namespace ast {
         std::vector<TempVarDecl> declarations;
     };
 
-    struct NonRetentiveVarDecls
-    {
-        VarInitDecl declarations;
-    };
+//    struct FunctionBlockTypeName : Variant<StandardFunctionBlockName, DerivedFunctionBlockName>
+//    {
+//    };
 
-    struct FunctionBlockBody : Variant<
-        SequentialFunctionChart,
-        LadderDiagram,
-        FunctionBlockDiagram,
-        InstructionList,
-        StateMentList>
-    {
-        using base = Variant<
-            SequentialFunctionChart,
-            LadderDiagram,
-            FunctionBlockDiagram,
-            InstructionList,
-            StateMentList>;
-        using base::base;
-
-    };
 
 
 #pragma mark - B.1.5.3 Programs
@@ -1104,20 +1210,22 @@ namespace ast {
         Identifier identifier;
     };
 
+    struct ProgramAccessDecl;
     struct ProgramDeclaration
     {
         ProgramTypeName typeName;
 
-        struct Declarations : Variant<IoVarDeclaration, OtherVarDeclarations, LocatedVarDeclarations, ProgramAccessDecl>
+        struct Declarations : Variant<IoVarDeclaration, OtherVarDeclarations, LocatedVarDeclarations, ForwardAst<ProgramAccessDecl>>
         {
-            using base = Variant<IoVarDeclaration, OtherVarDeclarations, LocatedVarDeclarations, ProgramAccessDecl>;
+            using base = Variant<IoVarDeclaration, OtherVarDeclarations, LocatedVarDeclarations, ForwardAst<ProgramAccessDecl>>;
             using base::base;
         };
     };
 
+    struct AccessName;
     struct ProgramAccessDecl
     {
-        AccessName accessName;
+        ForwardAst<AccessName> accessName;
         SymbolicVariable symbolicVariable;
         NonGenericTypeName typeName;
     };
@@ -1130,27 +1238,64 @@ namespace ast {
 
 #pragma mark - B.1.6 Sequential function chart elements
 
+
+
+    struct InitialStep;
+    struct Step;
+    struct Transition;
+    struct Action;
+    struct SFCNetwork
+    {
+        ForwardAst<InitialStep> initialStep;
+
+        struct Steps : Variant<ForwardAst<Step>, ForwardAst<Transition>, ForwardAst<Action>>
+        {
+            using base = Variant<ForwardAst<Step>, ForwardAst<Transition>, ForwardAst<Action>>;
+            using base::base;
+        };
+
+        std::vector<Steps> steps;
+    };
+
     struct SequentialFunctionChart
     {
         std::vector<SFCNetwork> networks;
     };
 
-    // TODO
-    struct SFCNetwork
+    struct StepName : public Identifier
     {
-        InitialStep initialStep;
-
     };
 
-    struct Step
+    struct ActionName : Variant<Duration, VariableName>
     {
-        StepName name;
-        ActionAssociation action;
+        using base = Variant<Duration, VariableName>;
+        using base::base;
     };
 
-    struct StepName;
+    struct ActionTime : Variant<Duration, VariableName>
     {
-        Identifier identifier;
+    };
+
+    enum class TimedQualifier
+    {
+        L = 1 << 10, D, SD, DS, SL
+    };
+
+    struct  ActionQualifier
+    {
+        enum class Qualifier
+        {
+            N, R, S, P,
+            L = 1 << 10, D, SD, DS, SL      // TODO:
+        };
+
+        Qualifier qualifier;
+        ActionTime time;
+    };
+
+    struct IndicatorName
+    {
+        VariableName variableName;
     };
 
     struct ActionAssociation
@@ -1160,36 +1305,14 @@ namespace ast {
         IndicatorName indicatorName;
     };
 
-    struct ActionName : Variant<Duration, VariableName>
+    struct Step
     {
-        using base = Variant<Duration, VariableName>;
-        using base::base;
+        StepName name;
+        ActionAssociation action;
     };
 
-    struct  ActionQualifier
+    struct InitialStep : public Step
     {
-        enum class Qualifier
-        {
-            N, R, S, P,
-            L = TimedQualifier::L, D, SD, DS, SL
-        }
-
-        Qualifier qualifier;
-        ActionTime time;
-    };
-
-    enum class TimedQualifier
-    {
-        L = 1 << 10, D, SD, DS, SL
-    };
-
-    struct ActionTime : Variant<Duration, VariableName>
-    {
-    };
-
-    struct IndicatorName
-    {
-        VariableName variableName;
     };
 
     struct TransitionName
@@ -1197,21 +1320,22 @@ namespace ast {
         Identifier identifier;
     };
 
+    struct Steps : public std::vector<StepName>
+    {
+    };
+
     struct Transition
     {
         TransitionName name;
-        Integer priority;
+        int64_t priority;
         Steps from;
         Steps to;
     };
 
-    struct Steps
-    {
-        std::vector<StepName> names;
-    };
-
     struct Action
     {
+        ActionName name;
+        FunctionBlockBody body;
     };
 
 
@@ -1227,38 +1351,35 @@ namespace ast {
 
     struct SingleResourceReference;
     struct AccessDeclaration;
-
+    struct GlobalVarReference;
+    struct ResourceReference;
+    struct InstanceSpecificInitializations;
 
     struct ConfigurationDeclaration
     {
         ConfigurationName name;
-        GlobalVarReference::List varReferenceList;
+        std::vector<GlobalVarReference> varReferenceList;
 
-        struct References : Variant<SingleResourceReference, std::vector<ResourceReference>>
+        struct References : public Variant<SingleResourceReference, std::vector<ResourceReference>>
         {
+            using base = Variant<SingleResourceReference, std::vector<ResourceReference>>;
+            using base::base;
         };
         References references;
-        AccessDeclaration accessDeclaration;
-        InstanceSpecificInitializations specificInitializations;
+        ForwardAst<AccessDeclaration> accessDeclaration;
+        ForwardAst<InstanceSpecificInitializations> specificInitializations;
     };
 
-    struct ResourceDeclaration
-    {
-        ResourceName resourceName;
-        ResourceTypeName typeName;
-        GlobalVariableDeclaration variableDeclaration;
-        SingleResourceDeclaration resourceDeclaration;
-    };
-
+    struct TaskConfiguration;
+    struct ProgrammConfiguration; // FIXME: typo
     struct SingleResourceDeclaration
     {
         std::vector<TaskConfiguration> taskConfigurations;
         std::vector<ProgrammConfiguration> programConfigurations;
     };
 
-    struct ResourceName
+    struct ResourceName : public Identifier
     {
-        Identifier name;
     };
 
     struct AccessPath
@@ -1267,7 +1388,7 @@ namespace ast {
         Variant<SymbolicVariable, DirectVariable> variable;
     };
 
-    struct AccessName : Identifier
+    struct AccessName : public Identifier
     {
     };
 
@@ -1283,10 +1404,16 @@ namespace ast {
     {
         ResourceName resourceName;
         GlobalVarName varName;
-
+        // TODO:
     };
 
-
+    struct ResourceDeclaration
+    {
+        ResourceName resourceName;
+        ResourceTypeName typeName;
+        GlobalVarDeclarations variableDeclaration;
+        SingleResourceDeclaration resourceDeclaration;
+    };
 
     struct ProgramOutputReference
     {
@@ -1296,26 +1423,33 @@ namespace ast {
     {
     };
 
-    struct TaskConfiguration
-    {
-        TaskName name;
-        TaskInitialization initialization;
-    };
-
     struct TaskName
     {
         Identifier identifier;
+    };
+
+    struct DataSource : public Variant<Constant, GlobalVarReference, ProgramOutputReference, DirectVariable>
+    {
+        using base = Variant<Constant, GlobalVarReference, ProgramOutputReference, DirectVariable>;
+        using base::base;
     };
 
     struct TaskInitialization
     {
         DataSource                  singleSource;
         DataSource                  intervalSource;
-        Integer                     priority;
+        int                     priority; // TODO:
     };
 
-    struct DataSource : Variant<Constant, GlobalVarReference, ProgramOutputReference, DirectVariable>
+    struct TaskConfiguration
     {
+        TaskName name;
+        TaskInitialization initialization;
+    };
+
+    struct ProgConfElements
+    {
+
     };
 
     struct ProgramConfiguration
@@ -1326,35 +1460,35 @@ namespace ast {
         ProgConfElements            configurationElement;
     };
 
-    struct ProgConfElements
-    {
 
-    };
-
-    struct ProgConfElement : Variant<FBTask, ProgCnxn>
+    struct FbTask
     {
-    };
-
-    struct FBTask
-    {
-        FBName name;
+        FunctionBlockName name;
         TaskName taskName;
+    };
+
+    struct ProgDataSource : public Variant<Constant, EnumeratedValue, GlobalVarReference, DirectVariable>
+    {
+        using base = Variant<Constant, EnumeratedValue, GlobalVarReference, DirectVariable>;
+        using base::base;
     };
 
     struct ProgCnxn
     {
         SymbolicVariable variable;
 
-        sturct Data : Variant<ProgDataSource, DataSource>
+        struct Data : Variant<ProgDataSource, DataSource>
         {
+            using base = Variant<ProgDataSource, DataSource>;
+            using base::base;
         };
 
         Data data;
     };
 
-    struct ProgDataSource : Variant<Constant, EnumeratedValue, GlobalVarReference, DirectVariable>
+    struct ProgConfElement : public Variant<FbTask, ProgCnxn>
     {
-        using base = Variant<Constant, EnumeratedValue, GlobalVarReference, DirectVariable>;
+        using base = Variant<FbTask, ProgCnxn>;
         using base::base;
     };
 
@@ -1367,25 +1501,26 @@ namespace ast {
 
     struct InstanceSpecificInit
     {
-        struct Variable {
+        struct Variable
+        {
             ResourceName resourceName;
             ProgramName programName;
-            FBName fbName;
+            FunctionBlockName fbName;
             VariableName variableName;
             Location location;
             LocatedVarSpecInit specInit;
-        }
+        };
 
-        struct FunctionBlock {
-            FBName fbName;
+        struct FunctionBlock
+        {
+            FunctionBlockName fbName;
             FunctionBlockTypeName type_name;
-
         };
     };
 
     struct InstanceSpecificInitialization : std::vector<InstanceSpecificInit>
     {
-        struct Inits : std::vector<instance_specific_init>
+        struct Inits : public std::vector<InstanceSpecificInit>
         {
         };
 
@@ -1482,29 +1617,30 @@ namespace ast {
         struct Label label;
     };
 
+    struct ILParamList;
 	struct ILFormalFunctionCall
 	{
 		FunctionName name;
-		std::optionl<ILParamList> paramList;
+		std::optional<ILParamList> paramList;
 	};
 
     enum class ILCallOperator;
-    struct IL_param_list;
+
     struct ILFbCall
     {
         struct fb
         {
             ForwardAst<ILCallOperator> call_operator;
-            FbName name;
+            FunctionBlockName name;
             // boost::optional
-            ForwardAst<IL_param_list> param_list;
+            ForwardAst<ILParamList> param_list;
         };
 
         std::variant<fb, ILOperandList> TODO_name;
     };
 
     struct IL_param_instruction;
-    struct IL_param_list : std::vector<IL_param_instruction>
+    struct ILParamList : std::vector<IL_param_instruction>
     {
         using base_type = std::vector<IL_param_instruction>;
         using base_type::base_type;
@@ -1514,7 +1650,7 @@ namespace ast {
     {
         // todo function_name
         std::string name;
-        IL_param_list param_list;
+        ILParamList param_list;
     };
 
     struct ILParamAssignment;
@@ -1609,23 +1745,28 @@ namespace ast {
     struct XorExpression;
     struct Expression
     {
-        std::vector<XorExpressions> operands;
+        std::vector<XorExpression> operands;
     };
 
     struct AndExpression;
     struct XorExpression
     {
-        std::vector<AndExpressions> operands;
+        std::vector<AndExpression> operands;
     };
 
     struct Comparison;
     struct EquExpression;
     struct AndExpression
     {
-        struct ComparisonNQ : Comparison { };
-        struct ComparisonEQ : Comparison { };
+        struct ComparisonNQ : public ForwardAst<Comparison>
+        {
+        };
 
-        std::vector<Comparision> operands;
+        struct ComparisonEQ : public ForwardAst<Comparison>
+        {
+        };
+
+        std::vector<Comparison> operands;
     };
 
 
@@ -1739,23 +1880,23 @@ namespace ast {
     };
 
 
-    struct AndExpression
-    {
-        Comparison first_compare;
-        std::vector<Comparison> compares;
-    };
-
-    struct XorExpression
-    {
-        AndExpression first_and;
-        std::vector<AndExpression> ands;
-    };
-
-    struct Expression
-    {
-        XorExpression first_expression;
-        std::vector<XorExpression> xors;
-    };
+//    struct AndExpression
+//    {
+//        Comparison first_compare;
+//        std::vector<Comparison> compares;
+//    };
+//
+//    struct XorExpression
+//    {
+//        AndExpression first_and;
+//        std::vector<AndExpression> ands;
+//    };
+//
+//    struct Expression
+//    {
+//        XorExpression first_expression;
+//        std::vector<XorExpression> xors;
+//    };
 
 #pragma mark - B.3.2 Statements
 
@@ -1798,10 +1939,15 @@ namespace ast {
 
     struct Return {};
 
-    // TODO:
-    struct SubprogramControlStatement : Variant<Return, FBInvocation>
+    struct FunctionBlockInvokation
     {
-        using base = Variant<Return, FBInvocation>;
+
+    };
+
+    // TODO:
+    struct SubprogramControlStatement : Variant<Return, FunctionBlockInvokation>
+    {
+        using base = Variant<Return, FunctionBlockInvokation>;
         using base::base;
     };
 
@@ -1825,11 +1971,11 @@ namespace ast {
 
     struct CaseListElement : std::variant<
          Subrange
-        ,SignedInteger
+    //        ,SignedInteger TODO:
         ,EnumeratedValue>
     {
-        using base_type = std::variant<Subrange, EnumeratedValue>;
-        using base_type::base_type;
+        using base = std::variant<Subrange, EnumeratedValue>;
+        using base::base;
     };
 
     struct CaseList : std::vector<CaseListElement>
@@ -1917,11 +2063,11 @@ namespace ast {
     struct IterationStatement : std::variant<
          ForStatement
         ,WhileStatement
-        ,repeat_statement
-        ,exit_statement>
+        ,RepeatStatement
+        ,ExitStatement>
     {
-        using base_type = std::variant<ForStatement, WhileStatement, RepeatStatement ,exit_statement>;
-        using base_type::base_type;
+        using base = std::variant<ForStatement, WhileStatement, RepeatStatement ,ExitStatement>;
+        using base::base;
     };
 
 }}}

@@ -34,18 +34,18 @@ namespace ast {
         ForwardAst(ForwardAst const& operand)
             : _ptr(new T(operand.get())) {}
 
-        ForwardAst(ForwardAst&& operand)
+        ForwardAst(ForwardAst&& operand) noexcept
             : _ptr(operand._ptr)
         {
             operand._ptr = nullptr;
         }
 
-        ForwardAst(T const& operand)
+        explicit ForwardAst(T const& operand)
             : _ptr(new T(operand))
         {
         }
 
-        ForwardAst(T&& operand)
+        explicit ForwardAst(T&& operand)
             : _ptr(new T(std::move(operand)))
         {
         }
@@ -60,7 +60,7 @@ namespace ast {
         /** \addtogroup Observers */
         /** @{ */
 
-        T& get() { return *_ptr; }
+        T& get() { return *_ptr; }  // FIXME: Do I really want this?
         const T& get() const { return *_ptr; }
 
         /** @} */
@@ -74,7 +74,7 @@ namespace ast {
             return *this;
         }
 
-        ForwardAst& operator=(ForwardAst&& rhs)
+        ForwardAst& operator=(ForwardAst&& rhs) noexcept
         {
             swap(rhs);
             return *this;

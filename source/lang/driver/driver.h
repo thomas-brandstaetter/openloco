@@ -28,8 +28,8 @@ namespace lang {
         /** @{ */
         Driver() :
             _tokens(),
-            _debug(false),
-            _current_file(nullptr)
+            _current_file(nullptr),
+            _debug(false)
         {
         }
 

@@ -29,7 +29,7 @@ namespace lang {
     int
     Driver::parse(File& infile, std::ostream &out)
     {
-        openloco::lang::file_streambuffer fsb { infile };
+        openloco::lang::FileStreambuffer fsb { infile };
         std::istream is { &fsb };
 
         _current_file = &infile;

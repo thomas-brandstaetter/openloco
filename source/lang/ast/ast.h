@@ -1349,10 +1349,10 @@ namespace ast {
     {
     };
 
-    struct SingleResourceReference;
+    struct SingleResourceDeclaration;
     struct AccessDeclaration;
     struct GlobalVarReference;
-    struct ResourceReference;
+    struct ResourceDeclaration;
     struct InstanceSpecificInitializations;
 
     struct ConfigurationDeclaration
@@ -1360,14 +1360,18 @@ namespace ast {
         ConfigurationName name;
         std::vector<GlobalVarReference> varReferenceList;
 
-        struct References : public Variant<SingleResourceReference, std::vector<ResourceReference>>
+        struct References : public Variant<ForwardAst<SingleResourceDeclaration>, std::vector<ResourceDeclaration>>
         {
-            using base = Variant<SingleResourceReference, std::vector<ResourceReference>>;
+            using base = Variant<ForwardAst<SingleResourceDeclaration>, std::vector<ResourceDeclaration>>;
             using base::base;
         };
         References references;
         ForwardAst<AccessDeclaration> accessDeclaration;
         ForwardAst<InstanceSpecificInitializations> specificInitializations;
+    };
+
+    struct ResourceName : public Identifier
+    {
     };
 
     struct TaskConfiguration;
@@ -1378,9 +1382,13 @@ namespace ast {
         std::vector<ProgrammConfiguration> programConfigurations;
     };
 
-    struct ResourceName : public Identifier
+    struct ResourceDeclaration
     {
-    };
+        ResourceName name;
+        ResourceTypeName typeName;
+        std::vector<GlobalVarDeclarations> globalVariableDeclarations;
+        std::vector<SingleResourceDeclaration> singleResourceDeclarations;
+    }
 
     struct AccessPath
     {
@@ -1405,14 +1413,6 @@ namespace ast {
         ResourceName resourceName;
         GlobalVarName varName;
         // TODO:
-    };
-
-    struct ResourceDeclaration
-    {
-        ResourceName resourceName;
-        ResourceTypeName typeName;
-        GlobalVarDeclarations variableDeclaration;
-        SingleResourceDeclaration resourceDeclaration;
     };
 
     struct ProgramOutputReference

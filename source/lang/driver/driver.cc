@@ -14,16 +14,17 @@ namespace lang {
     Driver::parse(std::istream &in, std::ostream &out)
     {
 
-        scanner scanner{*this, in};
-        parser parser{*this, scanner};
-
-        scanner.yyrestart(in);
-        scanner.set_debug(1);
-        parser.set_debug_level(1);
-        parser.set_debug_stream(std::cerr);
-        int res = parser.parse();
-
-        return res;
+//        scanner scanner{*this, in};
+//        parser parser{*this, scanner};
+//
+//        scanner.yyrestart(in);
+//        scanner.set_debug(1);
+//        parser.set_debug_level(1);
+//        parser.set_debug_stream(std::cerr);
+//        int res = parser.parse();
+//
+//        return res;
+        return 0;
     }
 
     int

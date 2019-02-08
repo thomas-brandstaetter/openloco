@@ -31,24 +31,28 @@ namespace meta {
         /**
          * @return The class name of the ast object.
          */
-        std::string class_name () const
+        std::string className () const
         {
             const std::type_info& ti = typeid(decltype(this));
             const char *name = ti.name();
 
-            char *res;
+            char *className;
 #ifdef HAVE_CXA_DEMANGLE
             char buf[1024];
             size_t size = sizeof(buf);
             int status;
 
-            res = abi::__cxa_demangle(name, buf, &size, &status);
+            className = abi::__cxa_demangle(name, buf, &size, &status);
+            if (size > 1024)
+            {
+                size = 1024;
+            }
             buf[size - 1] = '\0';
 #else
-            res = const_cast<char *>(name);
+            className = const_cast<char *>(name);
 #endif
 
-            return res;
+            return className;
         }
     };
 

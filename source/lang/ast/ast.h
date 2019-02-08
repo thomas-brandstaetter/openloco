@@ -620,12 +620,16 @@ namespace ast {
         List declarations;
     };
 
-    using structure_specification = std::variant<StructureDeclaration, InitializedStructure>;
+    struct StructureSpecification : Variant<StructureDeclaration, InitializedStructure>
+    {
+        using base = Variant<StructureDeclaration, InitializedStructure>;
+        using base::base;
+    };
 
     struct StructureTypeDeclaration
     {
         Identifier type_name;
-        structure_specification specification;
+        StructureSpecification specification;
     };
 
     struct TypeDeclaration
@@ -633,12 +637,16 @@ namespace ast {
         using List = std::vector<TypeDeclaration>;
         using Iterator = List::iterator;
 
-        using Declaration =
-            std::variant<
+        struct Declaration : public Variant<
                 SingleElementTypeDeclaration,
                 ArrayTypeDeclaration,
                 StructureTypeDeclaration,
-                StringTypeDeclaration>;
+                StringTypeDeclaration>
+        {
+            using base = Variant<SingleElementTypeDeclaration, ArrayTypeDeclaration, StructureTypeDeclaration, StringTypeDeclaration>;
+            using base::base;
+            using base::operator=;
+        };
 
         Declaration decl;
         Identifier type_name;
@@ -1388,7 +1396,7 @@ namespace ast {
         ResourceTypeName typeName;
         std::vector<GlobalVarDeclarations> globalVariableDeclarations;
         std::vector<SingleResourceDeclaration> singleResourceDeclarations;
-    }
+    };
 
     struct AccessPath
     {
@@ -1617,14 +1625,20 @@ namespace ast {
         struct Label label;
     };
 
-    struct ILParamList;
-	struct ILFormalFunctionCall
-	{
-		FunctionName name;
-		std::optional<ILParamList> paramList;
-	};
-
     enum class ILCallOperator;
+
+    struct IL_param_instruction;
+    struct ILParamList : std::vector<IL_param_instruction>
+    {
+        using base_type = std::vector<IL_param_instruction>;
+        using base_type::base_type;
+    };
+
+    struct ILFormalFunctionCall
+    {
+        FunctionName name;
+        std::optional<ForwardAst<ILParamList>> paramList;
+    };
 
     struct ILFbCall
     {
@@ -1637,20 +1651,6 @@ namespace ast {
         };
 
         std::variant<fb, ILOperandList> TODO_name;
-    };
-
-    struct IL_param_instruction;
-    struct ILParamList : std::vector<IL_param_instruction>
-    {
-        using base_type = std::vector<IL_param_instruction>;
-        using base_type::base_type;
-    };
-
-    struct ILFormalFunctCall
-    {
-        // todo function_name
-        std::string name;
-        ILParamList param_list;
     };
 
     struct ILParamAssignment;
@@ -1817,7 +1817,7 @@ namespace ast {
 
     struct Term
     {
-        ValueWrapper<Term> firstOperand;
+        ForwardAst<Term> firstOperand;
         MultiplyOperator operator_;
         PowerExpression expression;
     };
@@ -1830,7 +1830,7 @@ namespace ast {
     struct AddExpression
     {
         Term firstOperator;
-        ValueWrapper<AddExpression> secondOperator;
+        ForwardAst<AddExpression> secondOperator;
     };
 
     enum class ComparisonOperator
@@ -1855,7 +1855,7 @@ namespace ast {
 
     struct EquExpression
     {
-        ValueWrapper<EquExpression> firstOperand;
+        ForwardAst<EquExpression> firstOperand;
         AddExpression secondOperand;
         ComparisonOperator operator_;
     };

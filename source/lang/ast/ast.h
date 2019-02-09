@@ -175,7 +175,7 @@ namespace ast {
         integer_type_name type_name;
     };
 
-    struct RealLiteral : ValueWrapper<double>
+    struct RealLiteral : public ValueWrapper<double>
     {
     };
 
@@ -187,15 +187,15 @@ namespace ast {
 
 #pragma mark - B.1.2.2 Character Strings
 
-    struct SingleByteCharacterString : ValueWrapper<std::string>
+    struct SingleByteCharacterString : public ValueWrapper<std::string>
     {
         using base = ValueWrapper<std::string>;
         using base::base;
     };
 
-    struct DoubleByteCharacterString : ValueWrapper<std::string>
+    struct DoubleByteCharacterString : ValueWrapper<std::wstring>
     {
-        using base = ValueWrapper<std::string>;
+        using base = ValueWrapper<std::wstring>;
         using base::base;
     };
 
@@ -216,11 +216,11 @@ namespace ast {
         using base::base;
     };
 
-    struct Interval : ast::Days
+    struct Interval : Days
     {
     };
 
-    struct Duration : ast::Interval
+    struct Duration : Interval
     {
         Duration& operator=(const Interval rhs)
         {
@@ -535,13 +535,13 @@ namespace ast {
     struct StructureInitialization;
     struct ArrayInitialization;
 
-    struct ArrayInitialElement : public std::variant<
+    struct ArrayInitialElement : public Variant<
             Constant,
             EnumeratedValue,
             ForwardAst<StructureInitialization>,
             ForwardAst<ArrayInitialization>>
     {
-        using base_type = std::variant<
+        using base_type = Variant<
             Constant,
             EnumeratedValue,
             ForwardAst<StructureInitialization>,
@@ -603,7 +603,7 @@ namespace ast {
         Identifier element_name;
 
         using spec_init =
-            std::variant<
+            Variant<
                 SimpleTypeDeclaration::SpecInit,
                 SubrangeTypeDeclaration::SpecInit,
                 EnumeratedTypeDeclaration::SpecInit,
@@ -632,23 +632,27 @@ namespace ast {
         StructureSpecification specification;
     };
 
+
+
     struct TypeDeclaration
     {
         using List = std::vector<TypeDeclaration>;
         using Iterator = List::iterator;
 
-        struct Declaration : public Variant<
-                SingleElementTypeDeclaration,
-                ArrayTypeDeclaration,
-                StructureTypeDeclaration,
-                StringTypeDeclaration>
+        struct Declaration__ : public Variant<
+            SingleElementTypeDeclaration,
+            ArrayTypeDeclaration,
+            StructureTypeDeclaration,
+            StringTypeDeclaration>
         {
             using base = Variant<SingleElementTypeDeclaration, ArrayTypeDeclaration, StructureTypeDeclaration, StringTypeDeclaration>;
             using base::base;
-            using base::operator=;
         };
 
-        Declaration decl;
+        TypeDeclaration() = default;
+//        TypeDeclaration& operator=(TypeDeclaration &) = default;
+
+//        Declaration__ decl;
         Identifier type_name;
     };
 
@@ -725,7 +729,6 @@ namespace ast {
         RecordVariable record;
         FieldSelector field;
     };
-
 
     using Subscript = std::string;
     using SubscriptedVariable = SymbolicVariable;
@@ -1010,7 +1013,7 @@ namespace ast {
     struct SingleByteStringSpec;
     struct DoubleByteStringSpec;
 
-    struct LocatedVarSpecInit : Variant<
+    struct LocatedVarSpecInit : public Variant<
         SimpleSpecInit,
         ForwardAst<SubrangeSpecInit>,
         ForwardAst<EnumeratedSpecInit>,

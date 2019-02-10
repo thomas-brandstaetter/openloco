@@ -5,6 +5,10 @@
 
 #include <driver/driver.h>
 
+#include <antlr-gen/olccLexer.h>
+#include <antlr-gen/olccParser.h>
+#include <antlr4-runtime.h>
+
 
 namespace openloco {
 namespace lang {
@@ -13,38 +17,28 @@ namespace lang {
     int
     Driver::parse(std::istream &in, std::ostream &out)
     {
+        antlr4::ANTLRInputStream is {in};
+        olccLexer lexer {&is};
+        antlr4::CommonTokenStream tokens {&lexer};
 
-//        scanner scanner{*this, in};
-//        parser parser{*this, scanner};
+        tokens.fill();
+        for (auto token : tokens.getTokens())
+            std::cout << token->toString() << std::endl;
+//        olccParser parser {&tokens};
+//        parser.setBuildParseTree(true);
 //
-//        scanner.yyrestart(in);
-//        scanner.set_debug(1);
-//        parser.set_debug_level(1);
-//        parser.set_debug_stream(std::cerr);
-//        int res = parser.parse();
+//        antlr4::tree::ParseTree *tree = parser.library_element_declaration();
 //
-//        return res;
+//        std::cout << tree->toStringTree() << std::endl;
+
         return 0;
     }
 
     int
     Driver::parse(File& infile, std::ostream &out)
     {
-        openloco::lang::FileStreambuffer fsb { infile };
-        std::istream is { &fsb };
-
-        _current_file = &infile;
-        int res = parse(is, out);
-        _current_file = nullptr;
-
-        return res;
+        // openloco::lang::FileStreambuffer fsb { infile };
+        // std::istream is { &fsb };
+        return 1;
     }
-
-
-    void
-    Driver::add_token(std::string token)
-    {
-        _tokens.push_back(token);
-    }
-
 }}

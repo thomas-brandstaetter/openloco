@@ -19,8 +19,6 @@
 namespace openloco {
 namespace lang {
 
-    class parser;
-
     class Driver {
     public:
 
@@ -47,26 +45,8 @@ namespace lang {
 
         /** @} */
 
-        void set_debug(bool value) { _debug = value; }
+        void setDebug(bool value) { _debug = value; }
 
-        /** /addgroup Gathering */
-        /** @{ */
-
-        /**
-         * Build a pushdown automaton while parsing.
-         *
-         * @details Needs invocation in the parser code.
-         *
-         * @param token The token to add.
-         */
-        void add_token(std::string token);
-
-        void set_root(ast::root root)   { _ast_root = root; }
-        ast::root& get_root()           { return _ast_root; }
-        /** @} */
-
-        friend class parser;
-        friend class scanner;
 
     private:
 

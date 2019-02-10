@@ -214,7 +214,12 @@ double_byte_character_representation
                         ;
 
     /* TODO */
-common_character_representation:
+common_character_representation
+                        : LETTER
+                        | DIGIT
+                        | '$$'
+                        | '$L' | '$N' | '$P' | '$R' | '$T'
+                        | '$l' | '$n' | '$p' | '$r' | '$t'
                         ;
 
 
@@ -1099,6 +1104,4 @@ while_statement         : 'WHILE' expression 'DO' statement_list 'END_WHILE' ;
 repeat_statement        : 'REPEAT' statement_list 'UNTIL' expression 'END_REPEAT' ;
 
 exit_statement          : 'EXIT' ;
-
-
 

@@ -1,4 +1,4 @@
-#include <src/lang/driver/driver.h>
+#include "driver/driver.h"
 
 #include <fstream>
 #include <iostream>
@@ -7,10 +7,11 @@
 int
 main(int argc, char** argv) {
 
-    openloco::lang::driver d;
+    openloco::lang::Driver d;
     int result;
 
-    if (argc == 2) {
+    if (argc == 2)
+    {
         std::ifstream file { argv[1] };
         if (!file.is_open()) {
             std::cerr << "file: " << argv[1] << " could not be opened." << std::endl;
@@ -19,7 +20,10 @@ main(int argc, char** argv) {
 
         result = d.parse(file);
     }
-    else { result = d.parse(); }
+    else
+    {
+        result = d.parse(std::cin);
+    }
 
     return result;
 }

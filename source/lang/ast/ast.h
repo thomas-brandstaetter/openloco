@@ -118,33 +118,43 @@ namespace ast {
     };
 
     template<typename T>
-    struct Integer : Elementary<T>
+    struct IntegerBase : Elementary<T>
     {
         static const T s_kInfinum  = 0;
         static const T s_kSupremum = 0 - 1;
     };
 
-    struct USINT : public Integer<uint8_t> {};
-    struct UINT  : public Integer<uint16_t> {};
-    struct UDINT : public Integer<uint32_t> {};
-    struct ULINT : public Integer<uint64_t> {};
+    struct USINT : public IntegerBase<uint8_t> {};
+    struct UINT  : public IntegerBase<uint16_t> {};
+    struct UDINT : public IntegerBase<uint32_t> {};
+    struct ULINT : public IntegerBase<uint64_t> {};
+
+    struct Integer : Variant<USINT, UINT, UDINT, ULINT>
+    {
+        using base = Variant<USINT, UINT, UDINT, ULINT>;
+        using base::base;
+    };
 
     template<typename T>
-    struct SignedInteger : Integer<T>
+    struct SignedIntegerBase : IntegerBase<T>
     {
     public:
         static const T s_kInfinum = (1 << (sizeof(T) - 1));
         static const T s_kSupremum = ((1 << (sizeof(T) - 1))-1); // FIXME: 0-1
     };
 
-    struct SINT : public SignedInteger<int8_t> {};
-    struct INT  : public SignedInteger<int16_t> {};
-    struct DINT : public SignedInteger<int32_t> {};
-    struct LINT : public SignedInteger<int64_t> {};
+    struct SINT : public SignedIntegerBase<int8_t> {};
+    struct INT  : public SignedIntegerBase<int16_t> {};
+    struct DINT : public SignedIntegerBase<int32_t> {};
+    struct LINT : public SignedIntegerBase<int64_t> {};
 
+    struct SignedInteger : Variant<SINT, INT, DINT, LINT>
+    {
+        using base_type = Variant<SINT, INT, DINT, LINT>;
+        using base_type::base_type;
+    };
 
-
-    struct BinaryInteger : ValueWrapper<LINT>
+    struct BinaryInteger : ValueWrapper<unsigned long>
     {
     };
 
@@ -1047,7 +1057,7 @@ namespace ast {
 
     struct SingleByteStringSpec
     {
-        Integer<uint64_t> size;
+        UINT size;
         SingleByteCharacterString characterString;
     };
 
@@ -1059,7 +1069,7 @@ namespace ast {
 
     struct DoubleByteStringSpec
     {
-        Integer<uint64_t> size;
+        UINT size;
         DoubleByteCharacterString characterString;
     };
 
